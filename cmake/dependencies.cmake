@@ -25,5 +25,7 @@
 
 cmake_minimum_required (VERSION 3.30)
 
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED
+    unit_test_framework
+)
 

@@ -25,4 +25,21 @@
 
 cmake_minimum_required (VERSION 3.30)
 
-add_test(NAME "Baseline" COMMAND tbc)
+add_test(NAME "baseline" COMMAND tbc)
+
+add_executable (tbc_test)
+
+set(TBC_TEST_SOURCE_LIST
+    ${TBC_TEST_DIR}/source/lexer.c++
+    ${TBC_TEST_DIR}/source/main.c++
+)
+target_sources(tbc_test PRIVATE
+    ${TBC_TEST_SOURCE_LIST}
+)
+
+target_link_libraries(tbc_test PRIVATE
+    Boost::unit_test_framework
+)
+
+discover_tests(tbc_test)
+
