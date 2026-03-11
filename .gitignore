@@ -1,6 +1,10 @@
+# editor and tooling specific
+.cache/
+.vscode/
+
 # build directory
-[Bb]uild
-[Oo]ut
+[Bb]uild/
+[Oo]ut/
 
 # Prerequisites
 *.d

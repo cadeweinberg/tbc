@@ -24,9 +24,9 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include <iostream>
+#include <print>
 
 int main() {
-  std::cout << "Hello, World!\n";
+  std::print("Hello, World");
   return EXIT_SUCCESS;
 }

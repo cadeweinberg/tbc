@@ -23,18 +23,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
+cmake_minimum_required (VERSION 3.30)
 
-add_executable(tbc)
-
-set (TBC_SOURCE_LIST
-    ${TBC_SOURCE_DIR}/main.c++
-)
-target_sources(tbc PRIVATE
-    ${TBC_SOURCE_LIST}
-)
-
-target_include_directories(tbc PRIVATE
-    ${TBC_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIR}
-)
+find_package(Boost REQUIRED)
 

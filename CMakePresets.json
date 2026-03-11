@@ -16,7 +16,8 @@
         "cacheVariables": {
             "CMAKE_BUILD_TYPE": "Debug",
             "CMAKE_CXX_STANDARD": "23",
-            "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/debug"
+            "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/debug",
+            "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
         }
     },
     {
@@ -28,7 +29,8 @@
         "cacheVariables": {
             "CMAKE_BUILD_TYPE": "Release",
             "CMAKE_CXX_STANDARD": "23",
-            "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/release"
+            "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/release",
+            "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
         }
     }
     ],
