@@ -27,7 +27,7 @@
 add_executable(tbc)
 
 set (TBC_SOURCE_LIST
-    ${TBC_SOURCE_DIR}/main.c++
+    ${TBC_SOURCE_DIR}/main.cpp
 )
 target_sources(tbc PRIVATE
     ${TBC_SOURCE_LIST}

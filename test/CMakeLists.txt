@@ -30,8 +30,8 @@ add_test(NAME "baseline" COMMAND tbc)
 add_executable (tbc_test)
 
 set(TBC_TEST_SOURCE_LIST
-    ${TBC_TEST_DIR}/source/lexer.c++
-    ${TBC_TEST_DIR}/source/main.c++
+    ${TBC_TEST_DIR}/source/lexer.cpp
+    ${TBC_TEST_DIR}/source/main.cpp
 )
 target_sources(tbc_test PRIVATE
     ${TBC_TEST_SOURCE_LIST}
