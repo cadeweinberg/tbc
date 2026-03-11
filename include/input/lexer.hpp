@@ -27,4 +27,10 @@
 #ifndef TBC_INPUT_LEXER_HPP
 #define TBC_INPUT_LEXER_HPP
 
+#include "input/token.hpp"
+
+namespace tbc {
+class Lexer {};
+} // namespace tbc
+
 #endif // !TBC_INPUT_LEXER_HPP

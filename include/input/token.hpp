@@ -27,36 +27,34 @@
 
 #include <cstdint>
 
-namespace tbc
-{
-    enum class Token : uint8_t
-    {
-        End,
+namespace tbc {
+enum class Token : uint8_t {
+  End,
 
-        Return,
-        Let,
-        Fn,
+  Return,
+  Let,
+  Fn,
 
-        Equals,
-        EqualsEquals,
-        Less,
-        LessEquals,
-        Greater,
-        GreaterEquals,
+  Equals,
+  EqualsEquals,
+  Less,
+  LessEquals,
+  Greater,
+  GreaterEquals,
 
-        Plus,
-        Minus,
-        Star,
-        FSlash,
-        Percent,
+  Plus,
+  Minus,
+  Star,
+  FSlash,
+  Percent,
 
-        True,
-        False,
-        Integer,
+  True,
+  False,
+  Integer,
 
-        TypeBool,
-        TypeInteger,
-    };
+  TypeBool,
+  TypeInteger,
+};
 }
 
 #endif // !TBC_INPUT_TOKEN_HPP
