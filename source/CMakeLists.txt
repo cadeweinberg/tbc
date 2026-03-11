@@ -23,21 +23,13 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-cmake_minimum_required (VERSION 3.30)
 
-project(TBC
-    LANGUAGES C CXX ASM
-    VERSION 0.0.1.0
-    DESCRIPTION "A Tiny Bytecode Compiler."
+add_executable(tbc)
+
+set (TBC_SOURCE_LIST
+    ${TBC_SOURCE_DIR}/main.c++
+)
+target_sources(tbc PRIVATE
+    ${TBC_SOURCE_LIST}
 )
 
-set (TBC_BASE_DIR    ${TBC_SOURCE_DIR})
-set (TBC_CMAKE_DIR   ${TBC_BASE_DIR}/cmake)
-set (TBC_INCLUDE_DIR ${TBC_BASE_DIR}/include)
-set (TBC_SOURCE_DIR  ${TBC_BASE_DIR}/source)
-set (TBC_TEST_DIR    ${TBC_BASE_DIR}/test)
-
-include(CTest)
-
-add_subdirectory(${TBC_SOURCE_DIR})
-add_subdirectory(${TBC_TEST_DIR})
