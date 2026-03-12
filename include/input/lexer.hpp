@@ -27,10 +27,34 @@
 #ifndef TBC_INPUT_LEXER_HPP
 #define TBC_INPUT_LEXER_HPP
 
+#include <string_view>
+
+#include <boost/leaf.hpp>
+
+namespace leaf = boost::leaf;
+
 #include "input/token.hpp"
 
 namespace tbc {
-class Lexer {};
+class Lexer {
+public:
+  Lexer();
+  Lexer(std::string_view view);
+
+  void set(std::string_view view);
+  void reset();
+
+  leaf::result<Token> next();
+
+  std::string_view current() const;
+
+private:
+  char const *YYTOKEN;
+  char const *YYCURSOR;
+  char const *YYMARKER;
+  char const *YYCTXMARKER;
+  char const *YYLIMIT;
+};
 } // namespace tbc
 
 #endif // !TBC_INPUT_LEXER_HPP

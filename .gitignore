@@ -6,6 +6,9 @@
 [Bb]uild/
 [Oo]ut/
 
+# generated files
+source/input/lexer.cpp
+
 # Prerequisites
 *.d
 

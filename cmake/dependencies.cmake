@@ -29,3 +29,7 @@ find_package(Boost REQUIRED
     unit_test_framework
 )
 
+find_program(RE2C re2c REQUIRED
+    DOC "The generator program for the Lexer"
+)
+

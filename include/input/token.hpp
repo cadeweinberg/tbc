@@ -26,6 +26,10 @@
 #define TBC_INPUT_TOKEN_HPP
 
 #include <cstdint>
+#include <format>
+#include <ostream>
+#include <string_view>
+using namespace std::literals::string_view_literals;
 
 namespace tbc {
 enum class Token : uint8_t {
@@ -34,6 +38,10 @@ enum class Token : uint8_t {
   Return,
   Let,
   Fn,
+  True,
+  False,
+  TypeBool,
+  Typei64,
 
   Equals,
   EqualsEquals,
@@ -48,13 +56,30 @@ enum class Token : uint8_t {
   FSlash,
   Percent,
 
-  True,
-  False,
   Integer,
+  Label,
 
-  TypeBool,
-  TypeInteger,
 };
+
+std::string_view token_to_view(Token token) noexcept;
+
+inline std::ostream &operator<<(std::ostream &out, Token token) {
+  out << token_to_view(token);
+  return out;
 }
+} // namespace tbc
+
+template <> struct std::formatter<tbc::Token> {
+  template <class ParseContext>
+  auto parse(ParseContext &ctx) -> ParseContext::iterator {
+    return ctx.end();
+  }
+
+  template <class FormatContext>
+  auto format(tbc::Token token, FormatContext &ctx) const
+      -> FormatContext::iterator {
+    return std::format_to(ctx.begin(), "{}", token_to_view(token));
+  }
+};
 
 #endif // !TBC_INPUT_TOKEN_HPP

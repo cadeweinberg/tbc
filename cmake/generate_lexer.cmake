@@ -1,3 +1,4 @@
+
 #
 # Copyright 2026 Cade Weinberg
 # 
@@ -25,23 +26,16 @@
 
 cmake_minimum_required (VERSION 3.30)
 
-add_test(NAME "baseline" COMMAND tbc)
-
-add_executable (tbc_test)
-
-set(TBC_TEST_SOURCE_LIST
-    ${TBC_TEST_DIR}/source/lexer.cpp
-    ${TBC_TEST_DIR}/source/main.cpp
+add_custom_command(
+    OUTPUT ${TBC_SOURCE_DIR}/input/lexer.cpp
+    COMMAND ${RE2C}
+        ${TBC_SOURCE_DIR}/input/lexer.inpp 
+        --output ${TBC_SOURCE_DIR}/input/lexer.cpp
+        --input-encoding utf8
+        --utf8
+        -W
+    VERBATIM
+    DEPENDS ${TBC_SOURCE_DIR}/input/lexer.inpp
+    COMMENT "Generating lexer.cpp"
 )
-target_sources(tbc_test PRIVATE
-    ${TBC_TEST_SOURCE_LIST}
-)
-
-target_link_libraries(tbc_test PRIVATE
-    Boost::unit_test_framework
-
-    tbc_input
-)
-
-discover_tests(tbc_test)
 

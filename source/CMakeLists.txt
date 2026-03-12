@@ -23,14 +23,32 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
+# build the supporting libraries
+
+include(${TBC_CMAKE_DIR}/generate_lexer.cmake)
+
+add_library(tbc_input)
+
+set (TBC_INPUT_SOURCE_LIST
+    ${TBC_SOURCE_DIR}/input/lexer.cpp
+    ${TBC_SOURCE_DIR}/input/token.cpp
+)
+target_sources(tbc_input PUBLIC
+    ${TBC_INPUT_SOURCE_LIST}
+)
+
+target_include_directories(tbc_input PUBLIC
+    ${TBC_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIR}
+)
+
+
+# Build the tbc executable
 
 add_executable(tbc)
 
-set (TBC_SOURCE_LIST
-    ${TBC_SOURCE_DIR}/main.cpp
-)
 target_sources(tbc PRIVATE
-    ${TBC_SOURCE_LIST}
+    ${TBC_SOURCE_DIR}/main.cpp
 )
 
 target_include_directories(tbc PRIVATE
