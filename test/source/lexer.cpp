@@ -28,6 +28,11 @@
 #include <boost/test/unit_test.hpp>
 namespace data = boost::unit_test::data;
 
+#include <boost/random/mersenne_twister.hpp>
+
+#include <charconv>
+#include <limits>
+
 #include "input/lexer.hpp"
 #include "utility/error.hpp"
 
@@ -62,4 +67,71 @@ BOOST_DATA_TEST_CASE(lexer_keywords,
       });
 
   BOOST_TEST(expected == actual);
+}
+
+class LexerIntegerDataset {
+public:
+  static const int arity = 1;
+
+  struct iterator {
+    boost::mt19937_64 generator;
+    uint64_t number;
+
+    uint64_t operator*() const { return number; }
+    void operator++() { number = generator(); }
+  };
+
+  data::size_t size() const { return data::BOOST_TEST_DS_INFINITE_SIZE; }
+  iterator begin() const { return iterator{}; }
+};
+
+namespace boost {
+namespace unit_test {
+namespace data {
+namespace monomorphic {
+template <> struct is_dataset<LexerIntegerDataset> : boost::mpl::true_ {};
+} // namespace monomorphic
+} // namespace data
+} // namespace unit_test
+} // namespace boost
+
+BOOST_DATA_TEST_CASE(lexer_integer, LexerIntegerDataset{} ^ data::xrange(20),
+                     integer, index) {
+  static const uint32_t length = std::numeric_limits<uint64_t>::digits10 + 1;
+  char buffer[length + 1] = {};
+  {
+    auto [ptr, ec] = std::to_chars(buffer, buffer + length, integer);
+    if (ec != std::errc{}) {
+      BOOST_ERROR(std::make_error_code(ec));
+      return;
+    }
+  }
+
+  tbc::Lexer lexer({buffer, buffer + length});
+
+  tbc::Token actual = leaf::try_handle_all(
+      [&]() -> leaf::result<tbc::Token> { return lexer.next(); },
+      [&](tbc::Error const &error) -> tbc::Token {
+        BOOST_ERROR(error);
+        return tbc::Token::End;
+      },
+      [&]() -> tbc::Token {
+        BOOST_ERROR(bst::stacktrace());
+        std::abort();
+      });
+
+  BOOST_TEST(actual == tbc::Token::Integer);
+
+  uint64_t parsed = 0;
+  std::string_view view = lexer.current();
+  {
+    auto [ptr, ec] =
+        std::from_chars(view.data(), view.data() + view.length(), parsed);
+    if (ec != std::errc{}) {
+      BOOST_ERROR(std::make_error_code(ec));
+      return;
+    }
+  }
+
+  BOOST_TEST(parsed == integer);
 }
