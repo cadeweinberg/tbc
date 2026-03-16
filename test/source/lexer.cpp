@@ -29,6 +29,7 @@
 namespace data = boost::unit_test::data;
 
 #include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int_distribution.hpp>
 
 #include <charconv>
 #include <limits>
@@ -134,4 +135,77 @@ BOOST_DATA_TEST_CASE(lexer_integer, LexerIntegerDataset{} ^ data::xrange(20),
   }
 
   BOOST_TEST(parsed == integer);
+}
+
+static const std::string_view label_begin =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"sv;
+static const std::string_view label_continue =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789"sv;
+
+class LexerLabelDataset {
+public:
+  static const int arity = 1;
+  struct iterator {
+    using Generator = boost::random::mt19937;
+    using Distribution = boost::random::uniform_int_distribution<uint32_t>;
+    Generator generator;
+    std::string label;
+
+    iterator() { generate(); }
+
+    void generate() {
+      Distribution distribution{10, 100};
+      uint32_t length = distribution(generator);
+      label = choose(label_begin);
+
+      for (int i = 0; i < length; ++i) {
+        label += choose(label_continue);
+      }
+    }
+
+    char choose(std::string_view view) {
+      assert(std::in_range<uint32_t>(view.length()));
+      Distribution distribution{0, static_cast<uint32_t>(view.length()) - 1};
+      uint32_t index = distribution(generator);
+      return view.at(index);
+    }
+
+    std::string operator*() const { return label; }
+    void operator++() { generate(); }
+  };
+
+  data::size_t size() const { return data::BOOST_TEST_DS_INFINITE_SIZE; }
+  iterator begin() const { return iterator{}; }
+};
+
+namespace boost {
+namespace unit_test {
+namespace data {
+namespace monomorphic {
+template <> struct is_dataset<LexerLabelDataset> : boost::mpl::true_ {};
+} // namespace monomorphic
+} // namespace data
+} // namespace unit_test
+} // namespace boost
+
+BOOST_DATA_TEST_CASE(lexer_label, LexerLabelDataset{} ^ data::xrange(20), label,
+                     index) {
+  tbc::Lexer lexer{label};
+
+  tbc::Token actual = leaf::try_handle_all(
+      [&]() -> leaf::result<tbc::Token> { return lexer.next(); },
+      [&](tbc::Error const &error) -> tbc::Token {
+        BOOST_ERROR(error);
+        return tbc::Token::End;
+      },
+      [&]() -> tbc::Token {
+        BOOST_ERROR(bst::stacktrace());
+        std::abort();
+      });
+
+  BOOST_TEST(actual == tbc::Token::Label);
+
+  std::string_view view = lexer.current();
+
+  BOOST_TEST(view == label);
 }
