@@ -26,7 +26,7 @@
 cmake_minimum_required (VERSION 3.30)
 
 project(TBC
-    LANGUAGES C CXX ASM
+    LANGUAGES C CXX
     VERSION 0.0.1.0
     DESCRIPTION "A Tiny Bytecode Compiler."
 )

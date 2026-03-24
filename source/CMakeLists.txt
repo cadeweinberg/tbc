@@ -30,6 +30,8 @@ include(${TBC_CMAKE_DIR}/generate_lexer.cmake)
 add_library(tbc_input)
 
 set (TBC_INPUT_SOURCE_LIST
+    
+
     ${TBC_SOURCE_DIR}/input/lexer.cpp
     ${TBC_SOURCE_DIR}/input/token.cpp
 )

@@ -1,6 +1,7 @@
 # editor and tooling specific
 .cache/
 .vscode/
+.vs/
 
 # build directory
 [Bb]uild/
