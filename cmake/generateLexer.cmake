@@ -27,15 +27,15 @@
 cmake_minimum_required (VERSION 3.30)
 
 add_custom_command(
-    OUTPUT ${TBC_SOURCE_DIR}/input/lexer.cpp
+    OUTPUT ${TBC_SOURCE_DIR}/input/Lexer.cpp
     COMMAND ${RE2C}
-        ${TBC_SOURCE_DIR}/input/lexer.re2c 
-        --output ${TBC_SOURCE_DIR}/input/lexer.cpp
+        ${TBC_SOURCE_DIR}/input/Lexer.re2c 
+        --output ${TBC_SOURCE_DIR}/input/Lexer.cpp
         --input-encoding utf8
         --utf8
         -W
     VERBATIM
-    DEPENDS ${TBC_SOURCE_DIR}/input/lexer.re2c
-    COMMENT "Generating lexer.cpp"
+    DEPENDS ${TBC_SOURCE_DIR}/input/Lexer.re2c
+    COMMENT "Generating Lexer.cpp"
 )
 

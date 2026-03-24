@@ -65,7 +65,7 @@ std::string_view Lexer::current() const {
   re2c:YYCTYPE      = "unsigned char";
 */
 
-/*!include:re2c "unicode_categories.re"*/
+/*!include:re2c "UnicodeCategories.re"*/
 
 /*!re2c
 
@@ -91,30 +91,32 @@ leaf::result<Token> Lexer::next() {
     /*!re2c
 
       * { return leaf::new_error (Error::current("unexpected character.")); }
-      $ { return Token::End; }
+      $ { return Token::end; }
 
-      "return" { return Token::Return; }
-      "let"    { return Token::Let; }
-      "fn"     { return Token::Fn; }
-      "true"   { return Token::True; }
-      "false"  { return Token::False; }
-      "bool"   { return Token::TypeBool; }
-      "i64"    { return Token::Typei64; }
+      "return" { return Token::return_; }
+      "let"    { return Token::let; }
+      "fn"     { return Token::fn; }
+      "nil"    { return Token::nil; }
+      "true"   { return Token::true_; }
+      "false"  { return Token::false_; }
+      "Nil"    { return Token::typeNil; }
+      "Bool"   { return Token::typeBool; }
+      "I64"    { return Token::typei64; }
 
-      "="  { return Token::Equals; }
-      "==" { return Token::EqualsEquals; }
-      "<"  { return Token::Less; }
-      "<=" { return Token::LessEquals; }
-      ">"  { return Token::Greater; }
-      ">=" { return Token::GreaterEquals; }
-      "+"  { return Token::Plus; }
-      "-"  { return Token::Minus; }
-      "*"  { return Token::Star; }
-      "/"  { return Token::FSlash; }
-      "%"  { return Token::Percent; }
+      "="  { return Token::equals; }
+      "==" { return Token::equalsEquals; }
+      "<"  { return Token::less; }
+      "<=" { return Token::lessEquals; }
+      ">"  { return Token::greater; }
+      ">=" { return Token::greaterEquals; }
+      "+"  { return Token::plus; }
+      "-"  { return Token::minus; }
+      "*"  { return Token::star; }
+      "/"  { return Token::forwardSlash; }
+      "%"  { return Token::percent; }
 
-      integer    { return Token::Integer; }
-      identifier { return Token::Label; }
+      integer    { return Token::integer; }
+      identifier { return Token::label; }
 
      */
   }

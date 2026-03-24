@@ -22,69 +22,40 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 //
-#ifndef TBC_INPUT_TOKEN_HPP
-#define TBC_INPUT_TOKEN_HPP
+
+#ifndef TBC_IMR_EXPRESSION_HPP
+#define TBC_IMR_EXPRESSION_HPP
 
 #include <cstdint>
 #include <format>
 #include <ostream>
-#include <string_view>
-using namespace std::literals::string_view_literals;
+#include <vector>
+
+#include "representation/Instruction.hpp"
 
 namespace tbc {
-enum class Token : uint8_t {
-  end,
+class Expression : public std::vector<Instruction> {};
+}
 
-  return_,
-  let,
-  fn,
-  nil,
-  true_,
-  false_,
-  typeNil,
-  typeBool,
-  typei64,
-
-  equals,
-  equalsEquals,
-  less,
-  lessEquals,
-  greater,
-  greaterEquals,
-
-  plus,
-  minus,
-  star,
-  forwardSlash,
-  percent,
-
-  integer,
-  label,
-};
-
-std::string_view token_to_view(Token token) noexcept;
-
-} // namespace tbc
-
-template <> struct std::formatter<tbc::Token> {
-  template <class ParseContext>
-  auto parse(ParseContext &ctx) -> ParseContext::iterator {
-    return ctx.end();
+template <> struct std::formatter<tbc::Expression> {
+  template <class ParseContext> constexpr auto parse(ParseContext &ctx) {
+	return ctx.begin();
   }
-
   template <class FormatContext>
-  auto format(tbc::Token token, FormatContext &ctx) const
-      -> FormatContext::iterator {
-    return std::format_to(ctx.begin(), "{}", token_to_view(token));
+  constexpr auto format(const tbc::Expression &expression,
+						FormatContext &ctx) -> decltype(ctx.out()) {
+	for (const auto &instruction : expression) {
+	  std::format_to(ctx.out(), "{}\n", instruction);
+	}
+	return ctx.out();
   }
 };
 
 namespace tbc {
-inline std::ostream &operator<<(std::ostream &out, Token token) {
-  out << std::format("{}", token_to_view(token));
+inline auto operator<<(std::ostream &out, const Expression &expression)
+	-> std::ostream & {
+  out << std::format("{}", expression);
   return out;
 }
-} // namespace tbc
 
-
-#endif // !TBC_INPUT_TOKEN_HPP
+#endif // !TBC_IMR_EXPRESSION_HPP

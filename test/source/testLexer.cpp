@@ -37,19 +37,22 @@ namespace data = boost::unit_test::data;
 #include "input/lexer.hpp"
 #include "utility/error.hpp"
 
-tbc::Token expected_tokens[] = {
-    tbc::Token::End,          tbc::Token::Return,        tbc::Token::Let,
-    tbc::Token::Fn,           tbc::Token::True,          tbc::Token::False,
-    tbc::Token::TypeBool,     tbc::Token::Typei64,       tbc::Token::Equals,
-    tbc::Token::EqualsEquals, tbc::Token::Less,          tbc::Token::LessEquals,
-    tbc::Token::Greater,      tbc::Token::GreaterEquals, tbc::Token::Plus,
-    tbc::Token::Minus,        tbc::Token::Star,          tbc::Token::FSlash,
-    tbc::Token::Percent};
+tbc::Token expected_tokens[] = {tbc::Token::end,      tbc::Token::return_,
+                                tbc::Token::let,      tbc::Token::fn,
+                                tbc::Token::nil,      tbc::Token::true_,
+                                tbc::Token::false_,   tbc::Token::typeNil,
+                                tbc::Token::typeBool, tbc::Token::typei64,
+                                tbc::Token::equals,   tbc::Token::equalsEquals,
+                                tbc::Token::less,     tbc::Token::lessEquals,
+                                tbc::Token::greater,  tbc::Token::greaterEquals,
+                                tbc::Token::plus,     tbc::Token::minus,
+                                tbc::Token::star,     tbc::Token::forwardSlash,
+                                tbc::Token::percent};
 
 std::string_view expected_views[] = {
-    ""sv,    "return"sv, "let"sv, "fn"sv, "true"sv, "false"sv, "bool"sv,
-    "i64"sv, "="sv,      "=="sv,  "<"sv,  "<="sv,   ">"sv,     ">="sv,
-    "+"sv,   "-"sv,      "*"sv,   "/"sv,  "%"sv};
+    ""sv,    "return"sv, "let"sv, "fn"sv, "nil"sv, "true"sv, "false"sv,
+    "Nil"sv, "Bool"sv,   "I64"sv, "="sv,  "=="sv,  "<"sv,    "<="sv,
+    ">"sv,   ">="sv,     "+"sv,   "-"sv,  "*"sv,   "/"sv,    "%"sv};
 
 BOOST_DATA_TEST_CASE(lexer_keywords,
                      data::make(expected_tokens) ^ data::make(expected_views),
@@ -60,7 +63,7 @@ BOOST_DATA_TEST_CASE(lexer_keywords,
       [&]() -> leaf::result<tbc::Token> { return lexer.next(); },
       [&](tbc::Error const &error) -> tbc::Token {
         BOOST_ERROR(error);
-        return tbc::Token::End;
+        return tbc::Token::end;
       },
       [&]() -> tbc::Token {
         BOOST_ERROR(bst::stacktrace());
@@ -114,14 +117,14 @@ BOOST_DATA_TEST_CASE(lexer_integer, LexerIntegerDataset{} ^ data::xrange(20),
       [&]() -> leaf::result<tbc::Token> { return lexer.next(); },
       [&](tbc::Error const &error) -> tbc::Token {
         BOOST_ERROR(error);
-        return tbc::Token::End;
+        return tbc::Token::end;
       },
       [&]() -> tbc::Token {
         BOOST_ERROR(bst::stacktrace());
         std::abort();
       });
 
-  BOOST_TEST(actual == tbc::Token::Integer);
+  BOOST_TEST(actual == tbc::Token::integer);
 
   uint64_t parsed = 0;
   std::string_view view = lexer.current();
@@ -196,14 +199,14 @@ BOOST_DATA_TEST_CASE(lexer_label, LexerLabelDataset{} ^ data::xrange(20), label,
       [&]() -> leaf::result<tbc::Token> { return lexer.next(); },
       [&](tbc::Error const &error) -> tbc::Token {
         BOOST_ERROR(error);
-        return tbc::Token::End;
+        return tbc::Token::end;
       },
       [&]() -> tbc::Token {
         BOOST_ERROR(bst::stacktrace());
         std::abort();
       });
 
-  BOOST_TEST(actual == tbc::Token::Label);
+  BOOST_TEST(actual == tbc::Token::label);
 
   std::string_view view = lexer.current();
 

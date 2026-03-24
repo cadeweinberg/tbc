@@ -27,7 +27,7 @@
 #
 # The idea was inspired by the Catch2 library.
 #
-function(discover_tests TARGET)
+function(discoverTests TARGET)
     cmake_parse_arguments(
             # prefix
             "TEST_SUITE"
@@ -104,6 +104,6 @@ function(discover_tests TARGET)
 endfunction()
 
 set(TEST_SUITE_DISCOVER_AND_WRITE_TESTS_SCRIPT
-    ${CMAKE_CURRENT_LIST_DIR}/discover_tests_and_write_script.cmake
+    ${CMAKE_CURRENT_LIST_DIR}/discoverTestsAndWriteScript.cmake
     CACHE INTERNAL "Path to the script that discovers tests for the test suite"
 )

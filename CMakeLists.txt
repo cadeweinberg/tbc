@@ -38,8 +38,8 @@ set (TBC_SOURCE_DIR  ${TBC_BASE_DIR}/source)
 set (TBC_TEST_DIR    ${TBC_BASE_DIR}/test)
 
 include(CTest)
-include(${TBC_CMAKE_DIR}/dependencies.cmake)
-include(${TBC_CMAKE_DIR}/discover_tests.cmake)
+include(${TBC_CMAKE_DIR}/findDependencies.cmake)
+include(${TBC_CMAKE_DIR}/discoverTests.cmake)
 
 add_subdirectory(${TBC_SOURCE_DIR})
 add_subdirectory(${TBC_TEST_DIR})

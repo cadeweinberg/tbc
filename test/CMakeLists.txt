@@ -30,8 +30,8 @@ add_test(NAME "baseline" COMMAND tbc)
 add_executable (tbc_test)
 
 set(TBC_TEST_SOURCE_LIST
-    ${TBC_TEST_DIR}/source/lexer.cpp
-    ${TBC_TEST_DIR}/source/main.cpp
+    ${TBC_TEST_DIR}/source/testLexer.cpp
+    ${TBC_TEST_DIR}/source/testMain.cpp
 )
 target_sources(tbc_test PRIVATE
     ${TBC_TEST_SOURCE_LIST}
@@ -43,5 +43,5 @@ target_link_libraries(tbc_test PRIVATE
     tbc_input
 )
 
-discover_tests(tbc_test)
+discoverTests(tbc_test)
 

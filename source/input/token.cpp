@@ -30,50 +30,52 @@
 namespace tbc {
 std::string_view token_to_view(Token token) noexcept {
   switch (token) {
-  case Token::End:
+  case Token::end:
     return "EOF"sv;
-  case Token::Return:
+  case Token::return_:
     return "return"sv;
-  case Token::Let:
+  case Token::let:
     return "let"sv;
-  case Token::Fn:
+  case Token::fn:
     return "fn"sv;
-  case Token::True:
+  case Token::nil:
+    return "nil"sv;
+  case Token::true_:
     return "true"sv;
-  case Token::False:
+  case Token::false_:
     return "false"sv;
-  case Token::TypeBool:
-    return "bool"sv;
-  case Token::Typei64:
-    return "i64"sv;
-  case Token::Equals:
+  case Token::typeNil:
+    return "Nil"sv;
+  case Token::typeBool:
+    return "Bool"sv;
+  case Token::typei64:
+    return "I64"sv;
+  case Token::equals:
     return "="sv;
-  case Token::EqualsEquals:
+  case Token::equalsEquals:
     return "=="sv;
-  case Token::Less:
+  case Token::less:
     return "<"sv;
-  case Token::LessEquals:
+  case Token::lessEquals:
     return "<="sv;
-  case Token::Greater:
+  case Token::greater:
     return ">"sv;
-  case Token::GreaterEquals:
+  case Token::greaterEquals:
     return ">="sv;
-  case Token::Plus:
+  case Token::plus:
     return "+"sv;
-  case Token::Minus:
+  case Token::minus:
     return "-"sv;
-  case Token::Star:
+  case Token::star:
     return "*"sv;
-  case Token::FSlash:
+  case Token::forwardSlash:
     return "/"sv;
-  case Token::Percent:
+  case Token::percent:
     return "%"sv;
-  case Token::Integer:
+  case Token::integer:
     return "integer"sv;
-  case Token::Label:
+  case Token::label:
     return "label"sv;
-  default:
-    std::unreachable();
   }
 }
 } // namespace tbc

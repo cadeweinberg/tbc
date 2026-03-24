@@ -38,7 +38,7 @@ struct Operand {
   enum class Kind : uint8_t {
     Register,
     Stack,
-    Label,
+    label,
     Immediate,
   };
 
@@ -51,8 +51,8 @@ struct Operand {
   static Operand Stack(uint16_t index) {
     return {std::to_underlying(Kind::Stack), index};
   }
-  static Operand Label(uint16_t index) {
-    return {std::to_underlying(Kind::Label), index};
+  static Operand label(uint16_t index) {
+    return {std::to_underlying(Kind::label), index};
   }
 };
 
@@ -72,7 +72,7 @@ template <> struct std::formatter<tbc::Operand> {
       return std::format_to(ctx.out(), "r{}", operand.data);
     case tbc::Operand::Kind::Stack:
       return std::format_to(ctx.out(), "s{}", operand.data);
-    case tbc::Operand::Kind::Label:
+    case tbc::Operand::Kind::label:
       return std::format_to(ctx.out(), "l{}", operand.data);
     case tbc::Operand::Kind::Immediate:
       return std::format_to(ctx.out(), "#{}", operand.data);
