@@ -1,4 +1,3 @@
-
 //
 // Copyright 2026 Cade Weinberg
 //
@@ -24,37 +23,26 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#ifndef TBC_INPUT_LEXER_HPP
-#define TBC_INPUT_LEXER_HPP
+#ifndef TBC_REPRESENTATION_REGISTERS_HPP
+#define TBC_REPRESENTATION_REGISTERS_HPP
 
-#include <string_view>
-
-#include <boost/leaf.hpp>
-
-namespace leaf = boost::leaf;
-
-#include "input/Token.hpp"
+#include <array>
+#include <limits>
+#include <memory>
 
 namespace tbc {
-class Lexer {
+class Registers
+    : public std::array<uint64_t, UINT16_MAX>,
+      public std::enable_shared_from_this<Registers> {
+  struct Private {};
+
 public:
-  Lexer();
-  Lexer(std::string_view view);
+  using Ptr = std::shared_ptr<Registers>;
 
-  void set(std::string_view view);
-  void reset();
+  Registers(Private) {}
 
-  leaf::result<Token> next();
-
-  std::string_view current() const;
-
-private:
-  char const *YYTOKEN;
-  char const *YYCURSOR;
-  char const *YYMARKER;
-  char const *YYCTXMARKER;
-  char const *YYLIMIT;
+  static Ptr create() { return std::make_shared<Registers>(Private{}); }
 };
 } // namespace tbc
 
-#endif // !TBC_INPUT_LEXER_HPP
+#endif // !TBC_REPRESENTATION_REGISTERS_HPP

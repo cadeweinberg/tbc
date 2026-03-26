@@ -23,8 +23,8 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#ifndef TBC_IMR_INSTRUCTION_HPP
-#define TBC_IMR_INSTRUCTION_HPP
+#ifndef TBC_REPRESENTATION_INSTRUCTION_HPP
+#define TBC_REPRESENTATION_INSTRUCTION_HPP
 
 #include <cstdint>
 #include <format>
@@ -85,36 +85,60 @@ struct Instruction {
   };
 
   Instruction() = default;
-  Instruction(Kind kind, uint16_t code, Operand a = {}, Operand b = {},
+  Instruction(Kind kind, Control code, Operand a = {}, Operand b = {},
               Operand c = {})
-      : kind(std::to_underlying(kind)), code(code), a_kind(a.kind),
-        b_kind(b.kind), c_kind(c.kind), a_data(a.data), b_data(b.data),
-        c_data(c.data) {}
+      : kind(std::to_underlying(kind)), code(std::to_underlying(code)),
+        a_kind(a.kind), b_kind(b.kind), c_kind(c.kind), a_data(a.data),
+        b_data(b.data), c_data(c.data) {}
+
+  Instruction(Kind kind, Memory code, Operand a = {}, Operand b = {},
+              Operand c = {})
+      : kind(std::to_underlying(kind)), code(std::to_underlying(code)),
+        a_kind(a.kind), b_kind(b.kind), c_kind(c.kind), a_data(a.data),
+        b_data(b.data), c_data(c.data) {}
+
+  Instruction(Kind kind, Bitwise code, Operand a = {}, Operand b = {},
+              Operand c = {})
+      : kind(std::to_underlying(kind)), code(std::to_underlying(code)),
+        a_kind(a.kind), b_kind(b.kind), c_kind(c.kind), a_data(a.data),
+        b_data(b.data), c_data(c.data) {}
+
+  Instruction(Kind kind, Comparison code, Operand a = {}, Operand b = {},
+              Operand c = {})
+      : kind(std::to_underlying(kind)), code(std::to_underlying(code)),
+        a_kind(a.kind), b_kind(b.kind), c_kind(c.kind), a_data(a.data),
+        b_data(b.data), c_data(c.data) {}
+
+  Instruction(Kind kind, Arithmetic code, Operand a = {}, Operand b = {},
+              Operand c = {})
+      : kind(std::to_underlying(kind)), code(std::to_underlying(code)),
+        a_kind(a.kind), b_kind(b.kind), c_kind(c.kind), a_data(a.data),
+        b_data(b.data), c_data(c.data) {}
 
   Operand a() const { return {a_kind, a_data}; }
   Operand b() const { return {b_kind, b_data}; }
   Operand c() const { return {c_kind, c_data}; }
 
-  static Instruction halt() { return {Kind::control, control::halt}; }
+  static Instruction halt() { return {Kind::control, Control::halt}; }
 
   static Instruction move(Operand destination, Operand source) {
-    return {Kind::memory, memory::move, destination, source};
+    return {Kind::memory, Memory::move, destination, source};
   }
 
-  static Instruction and(Operand destination, Operand left, Operand right) {
-    return {Kind::bitwise, bitwise::and_, destination, left, right};
+  static Instruction and_(Operand destination, Operand left, Operand right) {
+    return {Kind::bitwise, Bitwise::and_, destination, left, right};
   }
 
-  static Instruction or(Operand destination, Operand left, Operand right) {
-    return {Kind::bitwise, bitwise::or_, destination, left, right};
+  static Instruction or_(Operand destination, Operand left, Operand right) {
+    return {Kind::bitwise, Bitwise::or_, destination, left, right};
   }
 
-  static Instruction xor(Operand destination, Operand left, Operand right) {
-    return {Kind::bitwise, bitwise::xor_, destination, left, right};
+  static Instruction xor_(Operand destination, Operand left, Operand right) {
+    return {Kind::bitwise, Bitwise::xor_, destination, left, right};
   }
 
-  static Instruction not(Operand destination, Operand source) {
-    return {Kind::bitwise, bitwise::not_, destination, source};
+  static Instruction not_(Operand destination, Operand source) {
+    return {Kind::bitwise, Bitwise::not_, destination, source};
   }
 
   static Instruction equals(Operand destination, Operand left, Operand right) {
@@ -137,11 +161,13 @@ struct Instruction {
     return {Kind::arithmetic, Arithmetic::add, destination, left, right};
   }
 
-  static Instruction subtract(Operand destination, Operand left, Operand right) {
+  static Instruction subtract(Operand destination, Operand left,
+                              Operand right) {
     return {Kind::arithmetic, Arithmetic::subtract, destination, left, right};
   }
 
-  static Instruction multiply(Operand destination, Operand left, Operand right) {
+  static Instruction multiply(Operand destination, Operand left,
+                              Operand right) {
     return {Kind::arithmetic, Arithmetic::multiply, destination, left, right};
   }
 
@@ -156,20 +182,22 @@ struct Instruction {
 
 } // namespace tbc
 
-
 template <> struct std::formatter<tbc::Instruction> {
-  template <class ParseContext> constexpr auto parse(ParseContext &ctx) {
+  template <class ParseContext>
+  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
     return ctx.begin();
   }
 
   template <class FormatContext>
-  constexpr auto format(const FormatContext &ctx,
-                        tbc::Instruction instruction) {
+  auto format(tbc::Instruction instruction, FormatContext &ctx) const
+      -> FormatContext::iterator {
     switch (static_cast<tbc::Instruction::Kind>(instruction.kind)) {
     case tbc::Instruction::Kind::control: {
       switch (static_cast<tbc::Instruction::Control>(instruction.code)) {
-      case tbc::Instruction::control::halt:
+      case tbc::Instruction::Control::halt:
         return std::format_to(ctx.out(), "halt {}", instruction.a());
+      default:
+        std::abort();
       }
     }
 
@@ -178,6 +206,8 @@ template <> struct std::formatter<tbc::Instruction> {
       case tbc::Instruction::Memory::move:
         return std::format_to(ctx.out(), "move {}, {}", instruction.a(),
                               instruction.b());
+      default:
+        std::abort();
       }
     }
 
@@ -198,6 +228,8 @@ template <> struct std::formatter<tbc::Instruction> {
       case tbc::Instruction::Bitwise::not_:
         return std::format_to(ctx.out(), "not {}, {}", instruction.a(),
                               instruction.b());
+      default:
+        std::abort();
       }
     }
 
@@ -214,11 +246,14 @@ template <> struct std::formatter<tbc::Instruction> {
       case tbc::Instruction::Comparison::greater:
         return std::format_to(ctx.out(), "greater {}, {}, {}", instruction.a(),
                               instruction.b(), instruction.c());
+
+      default:
+        std::abort();
       }
     }
 
     case tbc::Instruction::Kind::arithmetic: {
-      switch (static_cast<tbc::Instruction::arithmetic>(instruction.code)) {
+      switch (static_cast<tbc::Instruction::Arithmetic>(instruction.code)) {
       case tbc::Instruction::Arithmetic::negate:
         return std::format_to(ctx.out(), "negate {}, {}", instruction.a(),
                               instruction.b());
@@ -237,6 +272,9 @@ template <> struct std::formatter<tbc::Instruction> {
       case tbc::Instruction::Arithmetic::modulo:
         return std::format_to(ctx.out(), "modulo {}, {}, {}", instruction.a(),
                               instruction.b(), instruction.c());
+
+      default:
+        std::abort();
       }
     }
     }
@@ -245,13 +283,11 @@ template <> struct std::formatter<tbc::Instruction> {
 };
 
 namespace tbc {
-
 inline auto operator<<(std::ostream &out, Instruction instruction)
     -> std::ostream & {
   out << std::format("{}", instruction);
   return out;
 }
-
 } // namespace tbc
 
-#endif // !TBC_IMR_INSTRUCTION_HPP
+#endif // !TBC_REPRESENTATION_INSTRUCTION_HPP

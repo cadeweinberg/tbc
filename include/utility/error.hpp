@@ -30,45 +30,27 @@
 #include <ostream>
 #include <source_location>
 #include <string>
-
-#include <boost/stacktrace.hpp>
-namespace bst = boost::stacktrace;
+#include <stacktrace>
 
 namespace tbc {
 struct Error {
   std::string message;
   std::source_location location;
-  bst::stacktrace trace;
+  std::stacktrace trace;
 
   static Error
   current(std::string message,
           std::source_location location = std::source_location::current(),
-          bst::stacktrace trace = bst::stacktrace()) {
+          std::stacktrace trace = std::stacktrace::current()) {
     return {std::move(message), std::move(location), std::move(trace)};
   }
 };
-
-inline auto operator<<(std::ostream &out, const std::source_location &location)
-    -> std::ostream & {
-  out << location.file_name() << ":" << location.line() << "."
-      << location.column() << " in " << location.function_name();
-  return out;
-}
-
-inline auto operator<<(std::ostream &out, const Error &error)
-    -> std::ostream & {
-  out << "Error: " << error.message << "\n"
-      << "  at " << error.location << "\n"
-      << "  during:\n"
-      << error.trace;
-  return out;
-}
 } // namespace tbc
 
 template <> struct std::formatter<std::source_location> {
   template <class ParseContext>
   constexpr auto parse(ParseContext &ctx) -> ParseContext::iterator {
-    return ctx.begin();
+    return ctx.end();
   }
   template <class FormatContext>
   auto format(const std::source_location &location,
@@ -82,15 +64,29 @@ template <> struct std::formatter<std::source_location> {
 template <> struct std::formatter<tbc::Error> {
   template <class ParseContext>
   constexpr auto parse(ParseContext &ctx) -> ParseContext::iterator {
-    return ctx.begin();
+    return ctx.end();
   }
 
   template <class FormatContext>
-  auto format(const tbc::Error &error, FormatContext &context) const
+  constexpr auto format(const tbc::Error &error, FormatContext &context) const
       -> FormatContext::iterator {
     return std::format_to(context.out(), "Error: {}\n  at {}\n  during:\n{}",
                           error.message, error.location, error.trace);
   }
 };
+
+namespace tbc {
+inline auto operator<<(std::ostream &out, const std::source_location &location)
+    -> std::ostream & {
+  out << std::format("{}", location);
+  return out;
+}
+
+inline auto operator<<(std::ostream &out, const Error &error)
+    -> std::ostream & {
+  out << std::format("{}", error);
+  return out;
+}
+} // namespace tbc
 
 #endif // !TBC_UTILITY_ERROR_HPP

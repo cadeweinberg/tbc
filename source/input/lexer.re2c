@@ -24,8 +24,8 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include "input/lexer.hpp"
-#include "utility/error.hpp"
+#include "input/Lexer.hpp"
+#include "utility/Error.hpp"
 
 namespace tbc {
 Lexer::Lexer()
@@ -83,15 +83,17 @@ std::string_view Lexer::current() const {
   identifier   = id_start id_continue*;
 
   end = "\x00";
+
+  ws = [ \t\v\n\r]*;
  */
 
 leaf::result<Token> Lexer::next() {
   while (true) {
     YYTOKEN = YYCURSOR;
     /*!re2c
-
-      * { return leaf::new_error (Error::current("unexpected character.")); }
-      $ { return Token::end; }
+      *  { return leaf::new_error (std::format("unexpected character.")); }
+      $  { return Token::end; }
+      ws { continue; }
 
       "return" { return Token::return_; }
       "let"    { return Token::let; }
@@ -101,7 +103,7 @@ leaf::result<Token> Lexer::next() {
       "false"  { return Token::false_; }
       "Nil"    { return Token::typeNil; }
       "Bool"   { return Token::typeBool; }
-      "I64"    { return Token::typei64; }
+      "I64"    { return Token::typeI64; }
 
       "="  { return Token::equals; }
       "==" { return Token::equalsEquals; }
@@ -114,10 +116,11 @@ leaf::result<Token> Lexer::next() {
       "*"  { return Token::star; }
       "/"  { return Token::forwardSlash; }
       "%"  { return Token::percent; }
+      "("  { return Token::beginParenthesis; }
+      ")"  { return Token::endParenthesis; }
 
       integer    { return Token::integer; }
       identifier { return Token::label; }
-
      */
   }
 }

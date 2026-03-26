@@ -30,6 +30,7 @@ include(${TBC_CMAKE_DIR}/generateLexer.cmake)
 add_library(tbc_input)
 
 set (TBC_INPUT_SOURCE_LIST
+    ${TBC_SOURCE_DIR}/input/Parser.cpp
     ${TBC_SOURCE_DIR}/input/Lexer.cpp
     ${TBC_SOURCE_DIR}/input/Token.cpp
 )
@@ -42,7 +43,7 @@ target_include_directories(tbc_input PUBLIC
 )
 
 target_link_libraries(tbc_input PUBLIC 
-    Boost::headers
+    Boost::boost
 )
 
 # Build the tbc executable
@@ -55,5 +56,9 @@ target_sources(tbc PRIVATE
 
 target_include_directories(tbc PRIVATE
     ${TBC_INCLUDE_DIR}
+)
+
+target_link_libraries(tbc PRIVATE
+    tbc_input
 )
 

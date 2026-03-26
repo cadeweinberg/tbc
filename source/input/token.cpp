@@ -25,7 +25,7 @@
 
 #include <utility>
 
-#include "input/token.hpp"
+#include "input/Token.hpp"
 
 namespace tbc {
 std::string_view token_to_view(Token token) noexcept {
@@ -48,7 +48,7 @@ std::string_view token_to_view(Token token) noexcept {
     return "Nil"sv;
   case Token::typeBool:
     return "Bool"sv;
-  case Token::typei64:
+  case Token::typeI64:
     return "I64"sv;
   case Token::equals:
     return "="sv;
@@ -72,10 +72,16 @@ std::string_view token_to_view(Token token) noexcept {
     return "/"sv;
   case Token::percent:
     return "%"sv;
+  case Token::beginParenthesis:
+    return "("sv;
+  case Token::endParenthesis:
+    return ")"sv;
   case Token::integer:
     return "integer"sv;
   case Token::label:
     return "label"sv;
+  default:
+    return "unkown"sv;
   }
 }
 } // namespace tbc

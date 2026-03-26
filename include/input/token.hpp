@@ -43,7 +43,7 @@ enum class Token : uint8_t {
   false_,
   typeNil,
   typeBool,
-  typei64,
+  typeI64,
 
   equals,
   equalsEquals,
@@ -58,8 +58,15 @@ enum class Token : uint8_t {
   forwardSlash,
   percent,
 
+  beginParenthesis,
+  endParenthesis,
+
   integer,
   label,
+
+  // This must be the last token, and it must be the largest value of the enum,
+  // because it's used to determine the size of the rules array in the parser.
+  length,
 };
 
 std::string_view token_to_view(Token token) noexcept;
@@ -68,14 +75,14 @@ std::string_view token_to_view(Token token) noexcept;
 
 template <> struct std::formatter<tbc::Token> {
   template <class ParseContext>
-  auto parse(ParseContext &ctx) -> ParseContext::iterator {
+  constexpr auto parse(ParseContext &ctx) -> ParseContext::iterator {
     return ctx.end();
   }
 
   template <class FormatContext>
-  auto format(tbc::Token token, FormatContext &ctx) const
+  constexpr auto format(tbc::Token token, FormatContext &ctx) const
       -> FormatContext::iterator {
-    return std::format_to(ctx.begin(), "{}", token_to_view(token));
+    return std::format_to(ctx.out(), "{}", token_to_view(token));
   }
 };
 

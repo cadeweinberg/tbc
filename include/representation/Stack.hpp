@@ -23,58 +23,25 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#ifndef TBC_IMR_EXPRESSION_HPP
-#define TBC_IMR_EXPRESSION_HPP
+#ifndef TBC_REPRESENTATION_STACK_HPP
+#define TBC_REPRESENTATION_STACK_HPP
 
-#include <cstdint>
-#include <format>
 #include <memory>
-#include <ostream>
+#include <stack>
 #include <vector>
 
-#include "representation/Instruction.hpp"
-
 namespace tbc {
-class Expression : public std::vector<Instruction>,
-                   public std::enable_shared_from_this<Expression> {
+class Stack : public std::stack<uint64_t, std::vector<uint64_t>>,
+              public std ::enable_shared_from_this<Stack> {
   struct Private {};
 
 public:
-  using Ptr = std::shared_ptr<Expression>;
+  using Ptr = std::shared_ptr<Stack>;
 
-  Expression(Private) {}
+  Stack(Private) {}
 
-  static Ptr create() { return std::make_shared<Expression>(Private{}); }
+  static Ptr create() { return std::make_shared<Stack>(Private{}); }
 };
-}
-
-template <> struct std::formatter<tbc::Expression> {
-  template <class ParseContext> constexpr auto parse(ParseContext &ctx) const {
-    return ctx.begin();
-  }
-  template <class FormatContext>
-  constexpr auto format(const tbc::Expression &expression, FormatContext &ctx) const
-      -> decltype(ctx.out()) {
-    size_t index = 0;
-    for (const auto &instruction : expression) {
-      std::format_to(ctx.out(), "{}", instruction);
-
-      if (index < (expression.size() - 1)) {
-        std::format_to(ctx.out(), "\n");
-      }
-
-      index += 1;
-    }
-    return ctx.out();
-  }
-};
-
-namespace tbc {
-inline auto operator<<(std::ostream &out, const Expression &expression)
-    -> std::ostream & {
-  out << std::format("{}", expression);
-  return out;
-}
 } // namespace tbc
 
-#endif // !TBC_IMR_EXPRESSION_HPP
+#endif // !TBC_REPRESENTATION_STACK_HPP

@@ -23,8 +23,8 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#ifndef TBC_IMR_OPERAND_HPP
-#define TBC_IMR_OPERAND_HPP
+#ifndef TBC_REPRESENTATION_OPERAND_HPP
+#define TBC_REPRESENTATION_OPERAND_HPP
 
 #include <cstdint>
 #include <format>
@@ -36,23 +36,27 @@ struct Operand {
   uint16_t data;
 
   enum class Kind : uint8_t {
-    Register,
-    Stack,
+    register_,
+    stack,
     label,
-    Immediate,
+    i16,
+    u16,
   };
 
-  static Operand Register(uint16_t index) {
-    return {std::to_underlying(Kind::Register), index};
+  static Operand register_(uint16_t index) {
+    return {std::to_underlying(Kind::register_), index};
   }
-  static Operand Immediate(uint16_t index) {
-    return {std::to_underlying(Kind::Immediate), index};
-  }
-  static Operand Stack(uint16_t index) {
-    return {std::to_underlying(Kind::Stack), index};
+  static Operand stack(uint16_t index) {
+    return {std::to_underlying(Kind::stack), index};
   }
   static Operand label(uint16_t index) {
     return {std::to_underlying(Kind::label), index};
+  }
+  static Operand i16(uint16_t index) {
+    return {std::to_underlying(Kind::i16), index};
+  }
+  static Operand u16(uint16_t index) {
+    return {std::to_underlying(Kind::u16), index};
   }
 };
 
@@ -60,22 +64,26 @@ struct Operand {
 
 template <> struct std::formatter<tbc::Operand> {
   template <class ParseContext>
-  constexpr auto parse(ParseContext &ctx) -> decltype(ctx.begin()) {
+  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
     return ctx.begin();
   }
 
   template <class FormatContext>
-  constexpr auto format(tbc::Operand operand, FormatContext &ctx)
-      -> decltype(ctx.out()) {
+  constexpr auto format(tbc::Operand operand, FormatContext &ctx) const
+      -> FormatContext::iterator {
     switch (static_cast<tbc::Operand::Kind>(operand.kind)) {
-    case tbc::Operand::Kind::Register:
+    case tbc::Operand::Kind::register_:
       return std::format_to(ctx.out(), "r{}", operand.data);
-    case tbc::Operand::Kind::Stack:
+    case tbc::Operand::Kind::stack:
       return std::format_to(ctx.out(), "s{}", operand.data);
     case tbc::Operand::Kind::label:
       return std::format_to(ctx.out(), "l{}", operand.data);
-    case tbc::Operand::Kind::Immediate:
+    case tbc::Operand::Kind::i16:
       return std::format_to(ctx.out(), "#{}", operand.data);
+    case tbc::Operand::Kind::u16:
+      return std::format_to(ctx.out(), "#{}", operand.data);
+    default:
+      std::abort();
     }
   }
 };
@@ -89,4 +97,4 @@ inline auto operator<<(std::ostream &out, Operand operand)
 
 } // namespace tbc
 
-#endif // !TBC_IMR_OPERAND_HPP
+#endif // !TBC_REPRESENTATION_OPERAND_HPP
