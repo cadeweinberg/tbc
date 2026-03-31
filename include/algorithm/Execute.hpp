@@ -1,4 +1,3 @@
-
 //
 // Copyright 2026 Cade Weinberg
 //
@@ -24,38 +23,18 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#include <iostream>
-#include <print>
-#include <string>
+#ifndef TBC_ALGORITHM_EXECUTE_HPP
+#define TBC_ALGORITHM_EXECUTE_HPP
 
-#include "algorithm/Execute.hpp"
-#include "utility/Error.hpp"
-#include "input/Parser.hpp"
+#include <boost/leaf.hpp>
+
+namespace leaf = boost::leaf;
+
 #include "representation/Context.hpp"
+#include "representation/Value.hpp"
 
-int main() {
-  tbc::Context::Ptr context = tbc::Context::create();
-  tbc::Parser parser{context};
-
-  while (true) {
-    std::cout << ">> ";
-    std::string input{};
-    std::getline(std::cin, input);
-
-    parser.set(input);
-
-    leaf::try_handle_all(
-        [&]() -> leaf::result<void> { return parser.pull(); },
-        [&](tbc::Error const &error) { std::print("{}", error); },
-        [&]() { std::abort(); }
-    );
-
-    leaf::try_handle_all(
-        [&]() -> leaf::result<void> { return tbc::execute(context); },
-        [&](std::string const &error) { std::print("{}", error); },
-        [&]() { std::abort(); });
-
-    std::cout << "$ " << *context->getResult() << "\n";
-    std::cout << *context->getExpression();
-  }
+namespace tbc {
+leaf::result<void> execute(Context::Ptr context);
 }
+
+#endif // !TBC_ALGORITHM_EXECUTE_HPP

@@ -27,22 +27,24 @@
 
 include(${TBC_CMAKE_DIR}/generateLexer.cmake)
 
-add_library(tbc_input)
+add_library(tbc_common)
 
-set (TBC_INPUT_SOURCE_LIST
+set (TBC_COMMON_SOURCE_LIST
+    ${TBC_SOURCE_DIR}/algorithm/Execute.cpp
+
     ${TBC_SOURCE_DIR}/input/Parser.cpp
     ${TBC_SOURCE_DIR}/input/Lexer.cpp
     ${TBC_SOURCE_DIR}/input/Token.cpp
 )
-target_sources(tbc_input PUBLIC
-    ${TBC_INPUT_SOURCE_LIST}
+target_sources(tbc_common PUBLIC
+    ${TBC_COMMON_SOURCE_LIST}
 )
 
-target_include_directories(tbc_input PUBLIC
+target_include_directories(tbc_common PUBLIC
     ${TBC_INCLUDE_DIR}
 )
 
-target_link_libraries(tbc_input PUBLIC 
+target_link_libraries(tbc_common PUBLIC 
     Boost::boost
 )
 
@@ -59,6 +61,6 @@ target_include_directories(tbc PRIVATE
 )
 
 target_link_libraries(tbc PRIVATE
-    tbc_input
+    tbc_common
 )
 

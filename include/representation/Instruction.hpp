@@ -34,8 +34,8 @@
 
 namespace tbc {
 struct Instruction {
-  uint16_t kind : 3;
-  uint16_t code : 4;
+  uint16_t m_kind : 3;
+  uint16_t m_code : 4;
   uint16_t a_kind : 3;
   uint16_t b_kind : 3;
   uint16_t c_kind : 3;
@@ -44,19 +44,35 @@ struct Instruction {
   uint16_t c_data;
 
   enum class Kind : uint8_t {
-    control,
-    memory,
-    bitwise,
-    comparison,
-    arithmetic,
+    control = 0b000,
+    memory = 0b001,
+    bitwise = 0b010,
+    comparison = 0b011,
+    integral = 0b100,
   };
 
   enum class Control : uint8_t {
-    halt,
+    ret,
+    // jal,
+    // b,
+    // beq,
+    // bne,
+    // blt, reverse operands -> bgt
+    // bge, reverse operands -> ble
+    // bltu, reverse operands -> bgtu
+    // bgeu, reverse operands -> bleu
   };
 
   enum class Memory : uint8_t {
-    move,
+    // given the permutations of operands, move can handle
+    // register to register moves, register to memory moves, and memory to
+    // register moves. immediate to register and immediate to memory.
+    // since move is always two operands, we can assume that b and c can be
+    // combined
+    // into a single extended operand.
+    mv,
+    mvu, // move upper, the same as move except shifts the extended operand left
+         // by 32.
   };
 
   enum class Bitwise : uint8_t {
@@ -64,123 +80,401 @@ struct Instruction {
     or_,
     xor_,
     not_,
+    sll,
+    srl,
+    sra,
+    // rol,
+    // ror,
   };
 
   enum class Comparison : uint8_t {
-    equals,
-    // != is implemented as not equals, so it doesn't need its own instruction.
-    less,
-    // <= is implemented as not greater, so it doesn't need its own instruction.
-    greater,
-    // >= is implemented as not less, so it doesn't need its own instruction.
+    eq,
+    neq,
+    lt,   // reverse operands -> gt
+    lte,  // reverse operands -> gte
+    slt,  // reverse operands -> sgt
+    slte, // reverse operands -> sgte
   };
 
-  enum class Arithmetic : uint8_t {
-    negate,
+  enum class Integral : uint8_t {
+    neg,
     add,
-    subtract,
-    multiply,
-    divide,
-    modulo,
+    sub,
+    mul,
+    div,
+    mod,
+    // min
+    // max
+    // abs
+    // clamp(a, b, c) = min(max(a, b), c)
   };
+
+  // enum class Floating : uint8_t {
+  //   fneg,
+  //   fadd,
+  //   fsub,
+  //   fmul,
+  //   fdiv,
+  //   fmod,
+  // };
 
   Instruction() = default;
-  Instruction(Kind kind, Control code, Operand a = {}, Operand b = {},
-              Operand c = {})
-      : kind(std::to_underlying(kind)), code(std::to_underlying(code)),
-        a_kind(a.kind), b_kind(b.kind), c_kind(c.kind), a_data(a.data),
-        b_data(b.data), c_data(c.data) {}
+  Instruction(Control code, Operand a, Operand b, Operand c)
+      : m_kind(std::to_underlying(Kind::control)),
+        m_code(std::to_underlying(code)), a_kind(a.m_kind), b_kind(b.m_kind),
+        c_kind(c.m_kind), a_data(a.m_data), b_data(b.m_data), c_data(c.m_data) {
+  }
 
-  Instruction(Kind kind, Memory code, Operand a = {}, Operand b = {},
-              Operand c = {})
-      : kind(std::to_underlying(kind)), code(std::to_underlying(code)),
-        a_kind(a.kind), b_kind(b.kind), c_kind(c.kind), a_data(a.data),
-        b_data(b.data), c_data(c.data) {}
+  Instruction(Control code, Operand a, Operand b)
+      : m_kind(std::to_underlying(Kind::control)),
+        m_code(std::to_underlying(code)), a_kind(a.m_kind), b_kind(b.m_kind),
+        c_kind(0), a_data(a.m_data), b_data(b.m_data), c_data(0) {}
 
-  Instruction(Kind kind, Bitwise code, Operand a = {}, Operand b = {},
-              Operand c = {})
-      : kind(std::to_underlying(kind)), code(std::to_underlying(code)),
-        a_kind(a.kind), b_kind(b.kind), c_kind(c.kind), a_data(a.data),
-        b_data(b.data), c_data(c.data) {}
+  Instruction(Control code, Operand a)
+      : m_kind(std::to_underlying(Kind::control)),
+        m_code(std::to_underlying(code)), a_kind(a.m_kind), b_kind(0),
+        c_kind(0), a_data(a.m_data), b_data(0), c_data(0) {}
 
-  Instruction(Kind kind, Comparison code, Operand a = {}, Operand b = {},
-              Operand c = {})
-      : kind(std::to_underlying(kind)), code(std::to_underlying(code)),
-        a_kind(a.kind), b_kind(b.kind), c_kind(c.kind), a_data(a.data),
-        b_data(b.data), c_data(c.data) {}
+  // Instruction(Control code, Operand a, OperandExtended bc)
+  //     : m_kind(std::to_underlying(Kind::control)),
+  //       m_code(std::to_underlying(code)), a_kind(a.m_kind),
+  //       b_kind(bc.m_kind), c_kind(0), a_data(a.m_data), b_data(bc.upper()),
+  //       c_data(bc.lower()) {}
 
-  Instruction(Kind kind, Arithmetic code, Operand a = {}, Operand b = {},
-              Operand c = {})
-      : kind(std::to_underlying(kind)), code(std::to_underlying(code)),
-        a_kind(a.kind), b_kind(b.kind), c_kind(c.kind), a_data(a.data),
-        b_data(b.data), c_data(c.data) {}
+  // Instruction(Control code, OperandExtended ab)
+  //     : m_kind(std::to_underlying(Kind::control)),
+  //       m_code(std::to_underlying(code)), a_kind(ab.m_kind), b_kind(0),
+  //       c_kind(0), a_data(ab.upper()), b_data(ab.lower()), c_data(0) {}
 
+  Instruction(Memory code, Operand a, Operand b, Operand c)
+      : m_kind(std::to_underlying(Kind::memory)),
+        m_code(std::to_underlying(code)), a_kind(a.m_kind), b_kind(b.m_kind),
+        c_kind(c.m_kind), a_data(a.m_data), b_data(b.m_data), c_data(c.m_data) {
+  }
+
+  Instruction(Memory code, Operand a, Operand b)
+      : m_kind(std::to_underlying(Kind::memory)),
+        m_code(std::to_underlying(code)), a_kind(a.m_kind), b_kind(b.m_kind),
+        c_kind(0), a_data(a.m_data), b_data(b.m_data), c_data(0) {}
+
+  Instruction(Memory code, Operand a)
+      : m_kind(std::to_underlying(Kind::memory)),
+        m_code(std::to_underlying(code)), a_kind(a.m_kind), b_kind(0),
+        c_kind(0), a_data(a.m_data), b_data(0), c_data(0) {}
+
+  // Instruction(Memory code, Operand destination, OperandExtended source)
+  //     : m_kind(std::to_underlying(Kind::memory)),
+  //       m_code(std::to_underlying(code)), a_kind(destination.m_kind),
+  //       b_kind(source.m_kind), c_kind(0), a_data(destination.m_data),
+  //       b_data(source.upper()), c_data(source.lower()) {}
+
+  Instruction(Bitwise code, Operand a, Operand b, Operand c)
+      : m_kind(std::to_underlying(Kind::bitwise)),
+        m_code(std::to_underlying(code)), a_kind(a.m_kind), b_kind(b.m_kind),
+        c_kind(c.m_kind), a_data(a.m_data), b_data(b.m_data), c_data(c.m_data) {
+  }
+
+  Instruction(Bitwise code, Operand a, Operand b)
+      : m_kind(std::to_underlying(Kind::bitwise)),
+        m_code(std::to_underlying(code)), a_kind(a.m_kind), b_kind(b.m_kind),
+        c_kind(0), a_data(a.m_data), b_data(b.m_data), c_data(0) {}
+
+  // Instruction(Bitwise code, Operand a, OperandExtended bc)
+  //     : m_kind(std::to_underlying(Kind::bitwise)),
+  //       m_code(std::to_underlying(code)), a_kind(a.m_kind),
+  //       b_kind(bc.m_kind), c_kind(0), a_data(a.m_data), b_data(bc.upper()),
+  //       c_data(bc.lower()) {}
+
+  Instruction(Comparison code, Operand a, Operand b, Operand c)
+      : m_kind(std::to_underlying(Kind::comparison)),
+        m_code(std::to_underlying(code)), a_kind(a.m_kind), b_kind(b.m_kind),
+        c_kind(c.m_kind), a_data(a.m_data), b_data(b.m_data), c_data(c.m_data) {
+  }
+
+  Instruction(Comparison code, Operand a, Operand b)
+      : m_kind(std::to_underlying(Kind::comparison)),
+        m_code(std::to_underlying(code)), a_kind(a.m_kind), b_kind(b.m_kind),
+        c_kind(0), a_data(a.m_data), b_data(b.m_data), c_data(0) {}
+
+  Instruction(Integral code, Operand a, Operand b, Operand c)
+      : m_kind(std::to_underlying(Kind::integral)),
+        m_code(std::to_underlying(code)), a_kind(a.m_kind), b_kind(b.m_kind),
+        c_kind(c.m_kind), a_data(a.m_data), b_data(b.m_data), c_data(c.m_data) {
+  }
+
+  Instruction(Integral code, Operand a, Operand b)
+      : m_kind(std::to_underlying(Kind::integral)),
+        m_code(std::to_underlying(code)), a_kind(a.m_kind), b_kind(b.m_kind),
+        c_kind(0), a_data(a.m_data), b_data(b.m_data), c_data(0) {}
+
+  // Instruction(Integral code, Operand a, OperandExtended bc)
+  //     : m_kind(std::to_underlying(Kind::integral)),
+  //       m_code(std::to_underlying(code)), a_kind(a.m_kind),
+  //       b_kind(bc.m_kind), c_kind(0), a_data(a.m_data), b_data(bc.upper()),
+  //       c_data(bc.lower()) {}
+
+  Kind kind() const { return static_cast<Kind>(m_kind); }
+  template <class T> T code() const { return static_cast<T>(m_code); }
   Operand a() const { return {a_kind, a_data}; }
   Operand b() const { return {b_kind, b_data}; }
   Operand c() const { return {c_kind, c_data}; }
+  // OperandExtended bc() const {
+  //   return OperandExtended{b_kind,
+  //           static_cast<uint32_t>(b_data) << 16 |
+  //           static_cast<uint32_t>(c_data)};
+  // }
 
-  static Instruction halt() { return {Kind::control, Control::halt}; }
+  static Instruction ret(Operand value) { return {Control::ret, value}; }
 
-  static Instruction move(Operand destination, Operand source) {
-    return {Kind::memory, Memory::move, destination, source};
+  static Instruction mv(Operand destination, Operand source) {
+    return {Memory::mv, destination, source};
+  }
+
+  static Instruction mvu(Operand destination, Operand source) {
+    return {Memory::mvu, destination, source};
   }
 
   static Instruction and_(Operand destination, Operand left, Operand right) {
-    return {Kind::bitwise, Bitwise::and_, destination, left, right};
+    return {Bitwise::and_, destination, left, right};
   }
 
   static Instruction or_(Operand destination, Operand left, Operand right) {
-    return {Kind::bitwise, Bitwise::or_, destination, left, right};
+    return {Bitwise::or_, destination, left, right};
   }
 
   static Instruction xor_(Operand destination, Operand left, Operand right) {
-    return {Kind::bitwise, Bitwise::xor_, destination, left, right};
+    return {Bitwise::xor_, destination, left, right};
   }
 
   static Instruction not_(Operand destination, Operand source) {
-    return {Kind::bitwise, Bitwise::not_, destination, source};
+    return {Bitwise::not_, destination, source};
   }
 
-  static Instruction equals(Operand destination, Operand left, Operand right) {
-    return {Kind::comparison, Comparison::equals, destination, left, right};
+  static Instruction sll(Operand destination, Operand left, Operand right) {
+    return {Bitwise::sll, destination, left, right};
   }
 
-  static Instruction less(Operand destination, Operand left, Operand right) {
-    return {Kind::comparison, Comparison::less, destination, left, right};
+  static Instruction srl(Operand destination, Operand left, Operand right) {
+    return {Bitwise::srl, destination, left, right};
   }
 
-  static Instruction greater(Operand destination, Operand left, Operand right) {
-    return {Kind::comparison, Comparison::greater, destination, left, right};
+  static Instruction sra(Operand destination, Operand left, Operand right) {
+    return {Bitwise::sra, destination, left, right};
   }
 
-  static Instruction negate(Operand destination, Operand source) {
-    return {Kind::arithmetic, Arithmetic::negate, destination, source};
+  static Instruction eq(Operand destination, Operand left, Operand right) {
+    return {Comparison::eq, destination, left, right};
+  }
+
+  static Instruction neq(Operand destination, Operand left, Operand right) {
+    return {Comparison::neq, destination, left, right};
+  }
+
+  static Instruction lt(Operand destination, Operand left, Operand right) {
+    return {Comparison::lt, destination, left, right};
+  }
+
+  static Instruction lte(Operand destination, Operand left, Operand right) {
+    return {Comparison::lte, destination, left, right};
+  }
+
+  static Instruction gt(Operand destination, Operand left, Operand right) {
+    return {Comparison::lt, destination, right, left};
+  }
+
+  static Instruction gte(Operand destination, Operand left, Operand right) {
+    return {Comparison::lte, destination, right, left};
+  }
+
+  static Instruction slt(Operand destination, Operand left, Operand right) {
+    return {Comparison::slt, destination, left, right};
+  }
+
+  static Instruction slte(Operand destination, Operand left, Operand right) {
+    return {Comparison::slte, destination, left, right};
+  }
+
+  static Instruction sgt(Operand destination, Operand left, Operand right) {
+    return {Comparison::slt, destination, right, left};
+  }
+
+  static Instruction sgte(Operand destination, Operand left, Operand right) {
+    return {Comparison::slte, destination, right, left};
+  }
+
+  static Instruction neg(Operand destination, Operand source) {
+    return {Integral::neg, destination, source};
   }
 
   static Instruction add(Operand destination, Operand left, Operand right) {
-    return {Kind::arithmetic, Arithmetic::add, destination, left, right};
+    return {Integral::add, destination, left, right};
   }
 
-  static Instruction subtract(Operand destination, Operand left,
-                              Operand right) {
-    return {Kind::arithmetic, Arithmetic::subtract, destination, left, right};
+  static Instruction sub(Operand destination, Operand left, Operand right) {
+    return {Integral::sub, destination, left, right};
   }
 
-  static Instruction multiply(Operand destination, Operand left,
-                              Operand right) {
-    return {Kind::arithmetic, Arithmetic::multiply, destination, left, right};
+  static Instruction mul(Operand destination, Operand left, Operand right) {
+    return {Integral::mul, destination, left, right};
   }
 
-  static Instruction divide(Operand destination, Operand left, Operand right) {
-    return {Kind::arithmetic, Arithmetic::divide, destination, left, right};
+  static Instruction div(Operand destination, Operand left, Operand right) {
+    return {Integral::div, destination, left, right};
   }
 
-  static Instruction modulo(Operand destination, Operand left, Operand right) {
-    return {Kind::arithmetic, Arithmetic::modulo, destination, left, right};
+  static Instruction mod(Operand destination, Operand left, Operand right) {
+    return {Integral::mod, destination, left, right};
   }
 };
 
 } // namespace tbc
+
+template <> struct std::formatter<tbc::Instruction::Kind> {
+  template <class ParseContext>
+  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
+    return ctx.begin();
+  }
+  template <class FormatContext>
+  auto format(tbc::Instruction::Kind m_kind, FormatContext &ctx) const
+      -> FormatContext::iterator {
+    switch (m_kind) {
+    case tbc::Instruction::Kind::control:
+      return std::format_to(ctx.out(), "control");
+    case tbc::Instruction::Kind::memory:
+      return std::format_to(ctx.out(), "memory");
+    case tbc::Instruction::Kind::bitwise:
+      return std::format_to(ctx.out(), "bitwise");
+    case tbc::Instruction::Kind::comparison:
+      return std::format_to(ctx.out(), "comparison");
+    case tbc::Instruction::Kind::integral:
+      return std::format_to(ctx.out(), "integral");
+    default:
+      return std::format_to(ctx.out(), "unknown: {}",
+                            std::to_underlying(m_kind));
+    }
+  }
+};
+
+template <> struct std::formatter<tbc::Instruction::Control> {
+  template <class ParseContext>
+  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
+    return ctx.begin();
+  }
+  template <class FormatContext>
+  auto format(tbc::Instruction::Control control, FormatContext &ctx) const
+      -> FormatContext::iterator {
+    switch (control) {
+    case tbc::Instruction::Control::ret:
+      return std::format_to(ctx.out(), "ret");
+    default:
+      return std::format_to(ctx.out(), "unknown: {}",
+                            std::to_underlying(control));
+    }
+  }
+};
+
+template <> struct std::formatter<tbc::Instruction::Memory> {
+  template <class ParseContext>
+  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
+    return ctx.begin();
+  }
+  template <class FormatContext>
+  auto format(tbc::Instruction::Memory memory, FormatContext &ctx) const
+      -> FormatContext::iterator {
+    switch (memory) {
+    case tbc::Instruction::Memory::mv:
+      return std::format_to(ctx.out(), "mv");
+    case tbc::Instruction::Memory::mvu:
+      return std::format_to(ctx.out(), "mvu");
+    default:
+      return std::format_to(ctx.out(), "unknown: {}",
+                            std::to_underlying(memory));
+    }
+  }
+};
+
+template <> struct std::formatter<tbc::Instruction::Bitwise> {
+  template <class ParseContext>
+  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
+    return ctx.begin();
+  }
+  template <class FormatContext>
+  auto format(tbc::Instruction::Bitwise bitwise, FormatContext &ctx) const
+      -> FormatContext::iterator {
+    switch (bitwise) {
+    case tbc::Instruction::Bitwise::and_:
+      return std::format_to(ctx.out(), "and");
+    case tbc::Instruction::Bitwise::or_:
+      return std::format_to(ctx.out(), "or");
+    case tbc::Instruction::Bitwise::xor_:
+      return std::format_to(ctx.out(), "xor");
+    case tbc::Instruction::Bitwise::not_:
+      return std::format_to(ctx.out(), "not");
+    case tbc::Instruction::Bitwise::sll:
+      return std::format_to(ctx.out(), "sll");
+    case tbc::Instruction::Bitwise::srl:
+      return std::format_to(ctx.out(), "srl");
+    case tbc::Instruction::Bitwise::sra:
+      return std::format_to(ctx.out(), "sra");
+    default:
+      return std::format_to(ctx.out(), "unknown: {}",
+                            std::to_underlying(bitwise));
+    }
+  }
+};
+
+template <> struct std::formatter<tbc::Instruction::Comparison> {
+  template <class ParseContext>
+  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
+    return ctx.begin();
+  }
+  template <class FormatContext>
+  auto format(tbc::Instruction::Comparison comparison, FormatContext &ctx) const
+      -> FormatContext::iterator {
+    switch (comparison) {
+    case tbc::Instruction::Comparison::eq:
+      return std::format_to(ctx.out(), "eq");
+    case tbc::Instruction::Comparison::lt:
+      return std::format_to(ctx.out(), "lt");
+    case tbc::Instruction::Comparison::lte:
+      return std::format_to(ctx.out(), "lte");
+    case tbc::Instruction::Comparison::slt:
+      return std::format_to(ctx.out(), "slt");
+    case tbc::Instruction::Comparison::slte:
+      return std::format_to(ctx.out(), "slte");
+    default:
+      return std::format_to(ctx.out(), "unknown: {}",
+                            std::to_underlying(comparison));
+    }
+  }
+};
+
+template <> struct std::formatter<tbc::Instruction::Integral> {
+  template <class ParseContext>
+  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
+    return ctx.begin();
+  }
+  template <class FormatContext>
+  auto format(tbc::Instruction::Integral code, FormatContext &ctx) const
+      -> FormatContext::iterator {
+    switch (code) {
+    case tbc::Instruction::Integral::neg:
+      return std::format_to(ctx.out(), "neg");
+    case tbc::Instruction::Integral::add:
+      return std::format_to(ctx.out(), "add");
+    case tbc::Instruction::Integral::sub:
+      return std::format_to(ctx.out(), "sub");
+    case tbc::Instruction::Integral::mul:
+      return std::format_to(ctx.out(), "mul");
+    case tbc::Instruction::Integral::div:
+      return std::format_to(ctx.out(), "div");
+    case tbc::Instruction::Integral::mod:
+      return std::format_to(ctx.out(), "mod");
+    default:
+      return std::format_to(ctx.out(), "unknown: {}", std::to_underlying(code));
+    }
+  }
+};
 
 template <> struct std::formatter<tbc::Instruction> {
   template <class ParseContext>
@@ -191,28 +485,33 @@ template <> struct std::formatter<tbc::Instruction> {
   template <class FormatContext>
   auto format(tbc::Instruction instruction, FormatContext &ctx) const
       -> FormatContext::iterator {
-    switch (static_cast<tbc::Instruction::Kind>(instruction.kind)) {
+    switch (static_cast<tbc::Instruction::Kind>(instruction.m_kind)) {
     case tbc::Instruction::Kind::control: {
-      switch (static_cast<tbc::Instruction::Control>(instruction.code)) {
-      case tbc::Instruction::Control::halt:
-        return std::format_to(ctx.out(), "halt {}", instruction.a());
+      switch (static_cast<tbc::Instruction::Control>(instruction.m_code)) {
+      case tbc::Instruction::Control::ret:
+        return std::format_to(ctx.out(), "ret {}", instruction.a());
       default:
-        std::abort();
+        return std::format_to(ctx.out(), "unknown: {}",
+                              static_cast<uint16_t>(instruction.m_code));
       }
     }
 
     case tbc::Instruction::Kind::memory: {
-      switch (static_cast<tbc::Instruction::Memory>(instruction.code)) {
-      case tbc::Instruction::Memory::move:
-        return std::format_to(ctx.out(), "move {}, {}", instruction.a(),
+      switch (static_cast<tbc::Instruction::Memory>(instruction.m_code)) {
+      case tbc::Instruction::Memory::mv:
+        return std::format_to(ctx.out(), "mv {}, {}", instruction.a(),
+                              instruction.b());
+      case tbc::Instruction::Memory::mvu:
+        return std::format_to(ctx.out(), "mvu {}, {}", instruction.a(),
                               instruction.b());
       default:
-        std::abort();
+        return std::format_to(ctx.out(), "unknown: {}",
+                              static_cast<uint16_t>(instruction.m_code));
       }
     }
 
     case tbc::Instruction::Kind::bitwise: {
-      switch (static_cast<tbc::Instruction::Bitwise>(instruction.code)) {
+      switch (static_cast<tbc::Instruction::Bitwise>(instruction.m_code)) {
       case tbc::Instruction::Bitwise::and_:
         return std::format_to(ctx.out(), "and {}, {}, {}", instruction.a(),
                               instruction.b(), instruction.c());
@@ -228,53 +527,81 @@ template <> struct std::formatter<tbc::Instruction> {
       case tbc::Instruction::Bitwise::not_:
         return std::format_to(ctx.out(), "not {}, {}", instruction.a(),
                               instruction.b());
+
+      case tbc::Instruction::Bitwise::sll:
+        return std::format_to(ctx.out(), "sll {}, {}, {}", instruction.a(),
+                              instruction.b(), instruction.c());
+
+      case tbc::Instruction::Bitwise::srl:
+        return std::format_to(ctx.out(), "srl {}, {}, {}", instruction.a(),
+                              instruction.b(), instruction.c());
+
+      case tbc::Instruction::Bitwise::sra:
+        return std::format_to(ctx.out(), "sra {}, {}, {}", instruction.a(),
+                              instruction.b(), instruction.c());
+
       default:
-        std::abort();
+        return std::format_to(ctx.out(), "unknown: {}",
+                              static_cast<uint16_t>(instruction.m_code));
       }
     }
 
     case tbc::Instruction::Kind::comparison: {
-      switch (static_cast<tbc::Instruction::Comparison>(instruction.code)) {
-      case tbc::Instruction::Comparison::equals:
-        return std::format_to(ctx.out(), "equals {}, {}, {}", instruction.a(),
+      switch (static_cast<tbc::Instruction::Comparison>(instruction.m_code)) {
+      case tbc::Instruction::Comparison::eq:
+        return std::format_to(ctx.out(), "eq {}, {}, {}", instruction.a(),
                               instruction.b(), instruction.c());
 
-      case tbc::Instruction::Comparison::less:
-        return std::format_to(ctx.out(), "less {}, {}, {}", instruction.a(),
+      case tbc::Instruction::Comparison::neq:
+        return std::format_to(ctx.out(), "neq {}, {}, {}", instruction.a(),
                               instruction.b(), instruction.c());
 
-      case tbc::Instruction::Comparison::greater:
-        return std::format_to(ctx.out(), "greater {}, {}, {}", instruction.a(),
+      case tbc::Instruction::Comparison::lt:
+        return std::format_to(ctx.out(), "lt {}, {}, {}", instruction.a(),
+                              instruction.b(), instruction.c());
+
+      case tbc::Instruction::Comparison::lte:
+        return std::format_to(ctx.out(), "lte {}, {}, {}", instruction.a(),
+                              instruction.b(), instruction.c());
+
+      case tbc::Instruction::Comparison::slt:
+        return std::format_to(ctx.out(), "slt {}, {}, {}", instruction.a(),
+                              instruction.b(), instruction.c());
+
+      case tbc::Instruction::Comparison::slte:
+        return std::format_to(ctx.out(), "slte {}, {}, {}", instruction.a(),
                               instruction.b(), instruction.c());
 
       default:
-        std::abort();
+        return std::format_to(ctx.out(), "unknown: {}",
+                              static_cast<uint16_t>(instruction.m_code));
       }
     }
 
-    case tbc::Instruction::Kind::arithmetic: {
-      switch (static_cast<tbc::Instruction::Arithmetic>(instruction.code)) {
-      case tbc::Instruction::Arithmetic::negate:
-        return std::format_to(ctx.out(), "negate {}, {}", instruction.a(),
+    case tbc::Instruction::Kind::integral: {
+      switch (static_cast<tbc::Instruction::Integral>(instruction.m_code)) {
+      case tbc::Instruction::Integral::neg:
+        return std::format_to(ctx.out(), "neg {}, {}", instruction.a(),
                               instruction.b());
-      case tbc::Instruction::Arithmetic::add:
+      case tbc::Instruction::Integral::add:
         return std::format_to(ctx.out(), "add {}, {}, {}", instruction.a(),
                               instruction.b(), instruction.c());
-      case tbc::Instruction::Arithmetic::subtract:
-        return std::format_to(ctx.out(), "subtract {}, {}, {}", instruction.a(),
+      case tbc::Instruction::Integral::sub:
+        return std::format_to(ctx.out(), "sub {}, {}, {}", instruction.a(),
                               instruction.b(), instruction.c());
-      case tbc::Instruction::Arithmetic::multiply:
-        return std::format_to(ctx.out(), "multiply {}, {}, {}", instruction.a(),
+      case tbc::Instruction::Integral::mul:
+        return std::format_to(ctx.out(), "mul {}, {}, {}", instruction.a(),
                               instruction.b(), instruction.c());
-      case tbc::Instruction::Arithmetic::divide:
-        return std::format_to(ctx.out(), "divide {}, {}, {}", instruction.a(),
+      case tbc::Instruction::Integral::div:
+        return std::format_to(ctx.out(), "div {}, {}, {}", instruction.a(),
                               instruction.b(), instruction.c());
-      case tbc::Instruction::Arithmetic::modulo:
-        return std::format_to(ctx.out(), "modulo {}, {}, {}", instruction.a(),
+      case tbc::Instruction::Integral::mod:
+        return std::format_to(ctx.out(), "mod {}, {}, {}", instruction.a(),
                               instruction.b(), instruction.c());
 
       default:
-        std::abort();
+        return std::format_to(ctx.out(), "unknown: {}",
+                              static_cast<uint16_t>(instruction.m_code));
       }
     }
     }

@@ -31,8 +31,11 @@
 #include <memory>
 
 namespace tbc {
+using Register = uint64_t;
+using RegisterFile = std::array<Register, UINT8_MAX>;
+
 class Registers
-    : public std::array<uint64_t, UINT16_MAX>,
+    : public RegisterFile,
       public std::enable_shared_from_this<Registers> {
   struct Private {};
 
@@ -42,6 +45,10 @@ public:
   Registers(Private) {}
 
   static Ptr create() { return std::make_shared<Registers>(Private{}); }
+
+  Register &at(Index index) {
+    return RegisterFile::at(index.m_value);
+  }
 };
 } // namespace tbc
 

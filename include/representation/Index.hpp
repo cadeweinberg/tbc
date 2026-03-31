@@ -1,4 +1,3 @@
-
 //
 // Copyright 2026 Cade Weinberg
 //
@@ -23,39 +22,15 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 //
+#ifndef TBC_REPRESENTATION_INDEX_HPP
+#define TBC_REPRESENTATION_INDEX_HPP
 
-#include <iostream>
-#include <print>
-#include <string>
+#include <cstdint>
 
-#include "algorithm/Execute.hpp"
-#include "utility/Error.hpp"
-#include "input/Parser.hpp"
-#include "representation/Context.hpp"
-
-int main() {
-  tbc::Context::Ptr context = tbc::Context::create();
-  tbc::Parser parser{context};
-
-  while (true) {
-    std::cout << ">> ";
-    std::string input{};
-    std::getline(std::cin, input);
-
-    parser.set(input);
-
-    leaf::try_handle_all(
-        [&]() -> leaf::result<void> { return parser.pull(); },
-        [&](tbc::Error const &error) { std::print("{}", error); },
-        [&]() { std::abort(); }
-    );
-
-    leaf::try_handle_all(
-        [&]() -> leaf::result<void> { return tbc::execute(context); },
-        [&](std::string const &error) { std::print("{}", error); },
-        [&]() { std::abort(); });
-
-    std::cout << "$ " << *context->getResult() << "\n";
-    std::cout << *context->getExpression();
-  }
+namespace tbc {
+struct Index {
+  uint32_t m_value;
+};
 }
+
+#endif // !TBC_REPRESENTATION_INDEX_HPP

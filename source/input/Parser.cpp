@@ -72,7 +72,7 @@ leaf::result<Operand> Parser::unary() {
 
   switch (m_current) {
   case Token::minus:
-    return m_context->emitNegate(right);
+    return m_context->emitNeg(right);
 
   default:
     return leaf::new_error(std::format("{} is not a unary operator.", unop));
@@ -90,13 +90,13 @@ leaf::result<Operand> Parser::binary(Operand left) {
   case Token::plus:
     return m_context->emitAdd(left, right);
   case Token::minus:
-    return m_context->emitSubtract(left, right);
+    return m_context->emitSub(left, right);
   case Token::star:
-    return m_context->emitMultiply(left, right);
+    return m_context->emitMul(left, right);
   case Token::forwardSlash:
-    return m_context->emitDivide(left, right);
+    return m_context->emitDiv(left, right);
   case Token::percent:
-    return m_context->emitModulo(left, right);
+    return m_context->emitMod(left, right);
 
   default:
     return leaf::new_error(std::format("{} is not a binary operator", binop));
@@ -136,8 +136,13 @@ leaf::result<Operand> Parser::primary() {
 leaf::result<void> Parser::pull() {
   BOOST_LEAF_CHECK(next());
 
-  while (!peek(Token::end)) {
+  while (true) {
     BOOST_LEAF_AUTO(destination, infix(Precedence::assignment));
+
+    if (peek(Token::end)) {
+      m_context->emitRet(destination);
+      break;
+    }
   }
 
   return {};

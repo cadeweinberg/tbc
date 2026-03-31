@@ -40,7 +40,7 @@ target_sources(tbc_test PRIVATE
 target_link_libraries(tbc_test PRIVATE
     Boost::unit_test_framework
 
-    tbc_input
+    tbc_common
 )
 
 discoverTests(tbc_test)

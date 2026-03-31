@@ -55,15 +55,15 @@ template <> struct std::formatter<tbc::Expression> {
   template <class FormatContext>
   constexpr auto format(const tbc::Expression &expression, FormatContext &ctx) const
       -> decltype(ctx.out()) {
-    size_t index = 0;
+    // size_t index = 0;
     for (const auto &instruction : expression) {
-      std::format_to(ctx.out(), "{}", instruction);
+      std::format_to(ctx.out(), "{}\n", instruction);
 
-      if (index < (expression.size() - 1)) {
-        std::format_to(ctx.out(), "\n");
-      }
+      //if (index < (expression.size() - 1)) {
+      //  std::format_to(ctx.out(), "\n");
+      //}
 
-      index += 1;
+      //index += 1;
     }
     return ctx.out();
   }
