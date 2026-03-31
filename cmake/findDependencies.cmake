@@ -31,7 +31,10 @@ find_package(Boost CONFIG
     program_options
 )
 
-if (Boost-NOTFOUND)
+if (Boost_FOUND)
+    message(STATUS "Boost found: ${Boost_INCLUDE_DIRS}")
+else ()
+    message(STATUS "Boost not found, fetching from GitHub...")
     include(FetchContent)
     FetchContent_Declare(
         Boost
@@ -44,4 +47,8 @@ endif ()
 find_program(RE2C re2c REQUIRED
     DOC "The generator program for the Lexer"
 )
+
+if (RE2C_FOUND)
+    message(STATUS "re2c found: ${RE2C}")
+endif ()
 
