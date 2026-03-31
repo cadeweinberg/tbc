@@ -1,103 +1,195 @@
 {
-    "version": 9,
+    "version": 8,
     "cmakeMinimumRequired": {
         "major": 3,
-        "minor": 30,
+        "minor": 28,
         "patch": 0
     },
 
-    "configurePresets": [
+  "configurePresets": [
     {
-        "name": "Debug",
-        "displayName": "Debug",
-        "description": "unoptimized Build with debug information.",
-        "generator": "Ninja",
-        "binaryDir": "${sourceDir}/build/debug",
-        "cacheVariables": {
-            "CMAKE_BUILD_TYPE": "Debug",
-            "CMAKE_CXX_STANDARD": "23",
-            "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/debug",
-            "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
-        }
+      "name": "Debug",
+      "displayName": "Debug",
+      "description": "unoptimized Build with debug information.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_STANDARD": "23",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
     },
     {
-        "name": "Release",
-        "displayName": "Release",
-        "description": "Optimized build without debug information.",
-        "generator": "Ninja",
-        "binaryDir": "${sourceDir}/build/release",
-        "cacheVariables": {
-            "CMAKE_BUILD_TYPE": "Release",
-            "CMAKE_CXX_STANDARD": "23",
-            "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/release",
-            "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
-        }
-    }
-    ],
-    
-    "buildPresets": [
-    {
-        "name": "Debug",
-        "configurePreset": "Debug"
+      "name": "Release",
+      "displayName": "Release",
+      "description": "Optimized build without debug information.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_STANDARD": "23",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/release",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
     },
-
     {
-        "name": "Release",
-        "configurePreset": "Release"
-    }
-    ],
-
-    "testPresets": [
-    {
-        "name": "Debug",
-        "configurePreset": "Debug",
-        "output": {"outputOnFailure": true},
-        "execution": {"noTestsAction": "error", "stopOnFailure": true}
+      "name": "DebugWeb",
+      "displayName": "Debug WebAssembly",
+      "description": "unoptimized Build for WebAssembly with debug information.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/debug_web",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_STANDARD": "23",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/debug_web",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+      }
     },
-
     {
-        "name": "Release",
-        "configurePreset": "Release",
-        "output": {"outputOnFailure": true},
-        "execution": {"noTestsAction": "error", "stopOnFailure": true}
+      "name": "ReleaseWeb",
+      "displayName": "Release WebAssembly",
+      "description": "Optimized build for WebAssembly without debug information.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/release_web",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_STANDARD": "23",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/release_web",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+      }
     }
-    ],
+  ],
 
-    "workflowPresets": [
+  "buildPresets": [
     {
-        "name": "Debug",
-        "steps": [
+      "name": "Debug",
+      "configurePreset": "Debug"
+    },
+    {
+      "name": "Release",
+      "configurePreset": "Release"
+    },
+    {
+      "name": "DebugWeb",
+      "configurePreset": "DebugWeb"
+    },
+    {
+      "name": "ReleaseWeb",
+      "configurePreset": "ReleaseWeb"
+    }
+  ],
+
+  "testPresets": [
+    {
+      "name": "Debug",
+      "configurePreset": "Debug",
+      "output": { "outputOnFailure": true },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": true
+      }
+    },
+    {
+      "name": "Release",
+      "configurePreset": "Release",
+      "output": { "outputOnFailure": true },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": true
+      }
+    },
+    {
+      "name": "DebugWeb",
+      "configurePreset": "DebugWeb",
+      "output": { "outputOnFailure": true },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": true
+      }
+    },
+    {
+      "name": "ReleaseWeb",
+      "configurePreset": "ReleaseWeb",
+      "output": { "outputOnFailure": true },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": true
+      }
+    }
+  ],
+
+  "workflowPresets": [
+    {
+      "name": "Debug",
+      "steps": [
         {
-            "type": "configure",
-            "name": "Debug"
+          "type": "configure",
+          "name": "Debug"
         },
         {
-            "type": "build",
-            "name": "Debug"
+          "type": "build",
+          "name": "Debug"
         },
         {
-            "type": "test",
-            "name": "Debug"
+          "type": "test",
+          "name": "Debug"
         }
-        ]
+      ]
     },
 
     {
-        "name": "Release",
-        "steps": [
-            {
-                "type": "configure",
-                "name": "Release"
-            },
-            {
-                "type": "build",
-                "name": "Release"
-            },
-            {
-                "type": "test",
-                "name": "Release"
-            }
-        ]
-    }
-    ]
+      "name": "Release",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Release"
+        },
+        {
+          "type": "build",
+          "name": "Release"
+        },
+        {
+          "type": "test",
+          "name": "Release"
+        }
+      ]
+    },
+    {
+      "name": "DebugWeb",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "DebugWeb"
+        },
+        {
+          "type": "build",
+          "name": "DebugWeb"
+        },
+        {
+          "type": "test",
+          "name": "DebugWeb"
+        }
+      ]
+    },
+    {
+      "name": "ReleaseWeb",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ReleaseWeb"
+        },
+        {
+          "type": "build",
+          "name": "ReleaseWeb"
+        },
+        {
+          "type": "test",
+          "name": "ReleaseWeb"
+        }
+      ]
+    }   
+  ]
 }

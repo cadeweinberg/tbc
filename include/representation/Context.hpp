@@ -81,21 +81,15 @@ public:
     return destination;
   }
 
-  Operand emitSll(Operand left, Operand right) {
+  Operand emitSl(Operand left, Operand right) {
     Operand destination = Operand::reg(m_used++);
-    m_expression->push_back(Instruction::sll(destination, left, right));
+    m_expression->push_back(Instruction::sl(destination, left, right));
     return destination;
   }
 
-  Operand emitSrl(Operand left, Operand right) {
+  Operand emitSr(Operand left, Operand right) {
     Operand destination = Operand::reg(m_used++);
-    m_expression->push_back(Instruction::srl(destination, left, right));
-    return destination;
-  }
-
-  Operand emitSra(Operand left, Operand right) {
-    Operand destination = Operand::reg(m_used++);
-    m_expression->push_back(Instruction::sra(destination, left, right));
+    m_expression->push_back(Instruction::sr(destination, left, right));
     return destination;
   }
 

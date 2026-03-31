@@ -25,15 +25,36 @@
 //
 
 #include <iostream>
-#include <print>
 #include <string>
+
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
 
 #include "algorithm/Execute.hpp"
 #include "utility/Error.hpp"
 #include "input/Parser.hpp"
 #include "representation/Context.hpp"
 
-int main() {
+int main(int argc, char** argv) {
+  po::options_description desc("tbc [options]");
+  desc.add_options()
+      ("help,h", "Print this help message")
+      ("version,v", "Print program version");
+
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::notify(vm);
+
+  if (vm.count("help")) {
+    std::cout << desc << "\n";
+    return EXIT_SUCCESS;
+  }
+
+  if (vm.count("version")) {
+    std::cout << "tbc version 0.1.0\n";
+    return EXIT_SUCCESS;
+  }
+
   tbc::Context::Ptr context = tbc::Context::create();
   tbc::Parser parser{context};
 
@@ -46,13 +67,13 @@ int main() {
 
     leaf::try_handle_all(
         [&]() -> leaf::result<void> { return parser.pull(); },
-        [&](tbc::Error const &error) { std::print("{}", error); },
+        [&](tbc::Error const &error) { std::cerr << error << "\n"; },
         [&]() { std::abort(); }
     );
 
     leaf::try_handle_all(
         [&]() -> leaf::result<void> { return tbc::execute(context); },
-        [&](std::string const &error) { std::print("{}", error); },
+        [&](std::string const &error) { std::cerr << error << "\n"; },
         [&]() { std::abort(); });
 
     std::cout << "$ " << *context->getResult() << "\n";

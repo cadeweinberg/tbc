@@ -34,8 +34,8 @@ namespace data = boost::unit_test::data;
 #include <charconv>
 #include <limits>
 
-#include "input/lexer.hpp"
-#include "utility/error.hpp"
+#include "input/Lexer.hpp"
+#include "utility/Error.hpp"
 
 tbc::Token expected_tokens[] = {
     tbc::Token::end,           tbc::Token::return_,

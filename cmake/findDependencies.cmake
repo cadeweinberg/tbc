@@ -23,11 +23,23 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-cmake_minimum_required (VERSION 3.30)
+cmake_minimum_required (VERSION 3.28)
 
-find_package(Boost REQUIRED
+find_package(Boost CONFIG 
+    COMPONENTS
     unit_test_framework
+    program_options
 )
+
+if (Boost-NOTFOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        Boost
+        GIT_REPOSITORY https://github.com/boostorg/boost.git
+        GIT_TAG 1bed2b0712b2119f20d66c5053def9173c8462a5
+    )
+    FetchContent_MakeAvailable(Boost)
+endif ()
 
 find_program(RE2C re2c REQUIRED
     DOC "The generator program for the Lexer"

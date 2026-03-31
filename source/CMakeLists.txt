@@ -25,6 +25,8 @@
 
 # build the supporting libraries
 
+cmake_minimum_required (VERSION 3.28)
+
 include(${TBC_CMAKE_DIR}/generateLexer.cmake)
 
 add_library(tbc_common)
@@ -46,7 +48,12 @@ target_include_directories(tbc_common PUBLIC
 
 target_link_libraries(tbc_common PUBLIC 
     Boost::boost
+    Boost::program_options
 )
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_link_libraries(tbc_common PUBLIC stdc++exp)
+endif ()
 
 # Build the tbc executable
 

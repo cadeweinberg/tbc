@@ -58,11 +58,9 @@ static leaf::result<void> executeXor(Instruction instruction,
                                      Context::Ptr context);
 static leaf::result<void> executeNot(Instruction instruction,
                                      Context::Ptr context);
-static leaf::result<void> executeSll(Instruction instruction,
+static leaf::result<void> executeSl(Instruction instruction,
                                      Context::Ptr context);
-static leaf::result<void> executeSrl(Instruction instruction,
-                                     Context::Ptr context);
-static leaf::result<void> executeSra(Instruction instruction,
+static leaf::result<void> executeSr(Instruction instruction,
                                      Context::Ptr context);
 static leaf::result<void> executeEq(Instruction instruction,
                                     Context::Ptr context);
@@ -157,12 +155,10 @@ static leaf::result<void> executeBitwise(Instruction instruction,
     return executeXor(instruction, context);
   case Instruction::Bitwise::not_:
     return executeNot(instruction, context);
-  case Instruction::Bitwise::sll:
-    return executeSll(instruction, context);
-  case Instruction::Bitwise::srl:
-    return executeSrl(instruction, context);
-  case Instruction::Bitwise::sra:
-    return executeSra(instruction, context);
+  case Instruction::Bitwise::sl:
+    return executeSl(instruction, context);
+  case Instruction::Bitwise::sr:
+    return executeSr(instruction, context);
   default:
     return leaf::new_error(
         std::format("Invalid bitwise instruction code: {}",
@@ -539,12 +535,12 @@ static leaf::result<void> executeNot(Instruction instruction,
   return {};
 }
 
-static leaf::result<void> executeSll(Instruction instruction,
+static leaf::result<void> executeSl(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
     return leaf::new_error(std::format(
-        "Invalid destination operand kind in sll instruction: {}", a.kind()));
+        "Invalid destination operand kind in sl instruction: {}", a.kind()));
   }
   Register &destination = context->registerAt(a.as<Index>());
   Operand source = instruction.b();
@@ -555,7 +551,7 @@ static leaf::result<void> executeSll(Instruction instruction,
     Register &shiftValue = context->registerAt(shift.as<Index>());
     if (shiftValue >= 64) {
       return leaf::new_error(std::format(
-          "Shift value too large in sll instruction: {}", shiftValue));
+          "Shift value too large in sl instruction: {}", shiftValue));
     }
 
     switch (source.kind()) {
@@ -563,47 +559,22 @@ static leaf::result<void> executeSll(Instruction instruction,
       destination = context->registerAt(source.as<Index>()) << shiftValue;
       break;
     case Operand::Kind::i16:
-      destination = source.as<int64_t>() << shiftValue;
-      break;
     case Operand::Kind::u16:
       destination = source.as<uint64_t>() << shiftValue;
       break;
     default:
       return leaf::new_error(std::format(
-          "Invalid source operand kind in sll instruction: {}", source.kind()));
+          "Invalid source operand kind in sl instruction: {}", source.kind()));
     }
     break;
   }
 
-  case Operand::Kind::i16: {
-    int64_t shiftValue = shift.as<int64_t>();
-    if (shiftValue < 0 || shiftValue >= 64) {
-      return leaf::new_error(std::format(
-          "Invalid shift value in sll instruction: {}", shiftValue));
-    }
-
-    switch (source.kind()) {
-    case Operand::Kind::reg:
-      destination = context->registerAt(source.as<Index>()) << shiftValue;
-      break;
-    case Operand::Kind::i16:
-      destination = source.as<int64_t>() << shiftValue;
-      break;
-    case Operand::Kind::u16:
-      destination = source.as<uint64_t>() << shiftValue;
-      break;
-    default:
-      return leaf::new_error(std::format(
-          "Invalid source operand kind in sll instruction: {}", source.kind()));
-    }
-    break;
-  }
-
+  case Operand::Kind::i16:
   case Operand::Kind::u16: {
     uint64_t shiftValue = shift.as<uint64_t>();
     if (shiftValue >= 64) {
       return leaf::new_error(std::format(
-          "Shift value too large in sll instruction: {}", shiftValue));
+          "Invalid shift value in sl instruction: {}", shiftValue));
     }
 
     switch (source.kind()) {
@@ -611,31 +582,31 @@ static leaf::result<void> executeSll(Instruction instruction,
       destination = context->registerAt(source.as<Index>()) << shiftValue;
       break;
     case Operand::Kind::i16:
-      destination = source.as<int64_t>() << shiftValue;
-      break;
     case Operand::Kind::u16:
       destination = source.as<uint64_t>() << shiftValue;
       break;
     default:
       return leaf::new_error(std::format(
-          "Invalid source operand kind in sll instruction: {}", source.kind()));
+          "Invalid source operand kind in sl instruction: {}", source.kind()));
     }
     break;
   }
 
+   
+
   default:
     return leaf::new_error(std::format(
-        "Invalid shift operand kind in sll instruction: {}", shift.kind()));
+        "Invalid shift operand kind in sl instruction: {}", shift.kind()));
   }
   return {};
 }
 
-static leaf::result<void> executeSrl(Instruction instruction,
+static leaf::result<void> executeSr(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
     return leaf::new_error(std::format(
-        "Invalid destination operand kind in srl instruction: {}", a.kind()));
+        "Invalid destination operand kind in sr instruction: {}", a.kind()));
   }
   Register &destination = context->registerAt(a.as<Index>());
   Operand source = instruction.b();
@@ -646,206 +617,52 @@ static leaf::result<void> executeSrl(Instruction instruction,
     Register &shiftValue = context->registerAt(shift.as<Index>());
     if (shiftValue >= 64) {
       return leaf::new_error(std::format(
-          "Shift value too large in srl instruction: {}", shiftValue));
+          "Shift value too large in sr instruction: {}", shiftValue));
     }
     switch (source.kind()) {
     case Operand::Kind::reg: {
-      BOOST_LEAF_AUTO(shifted,
-                      srl(context->registerAt(source.as<Index>()), shiftValue));
-      destination = shifted;
+		destination = context->registerAs<int64_t>(source.as<Index>()) >> shiftValue;
       break;
     }
-    case Operand::Kind::i16: {
-      BOOST_LEAF_AUTO(shifted, srl(source.as<uint64_t>(), shiftValue));
-      destination = shifted;
-      break;
-    }
+    case Operand::Kind::i16:
     case Operand::Kind::u16: {
-      BOOST_LEAF_AUTO(shifted, srl(source.as<uint64_t>(), shiftValue));
-      destination = shifted;
+		destination = source.as<int64_t>() >> shiftValue;
       break;
     }
     default:
       return leaf::new_error(std::format(
-          "Invalid source operand kind in srl instruction: {}", source.kind()));
+          "Invalid source operand kind in sr instruction: {}", source.kind()));
     }
     break;
   }
 
-  case Operand::Kind::i16: {
+  case Operand::Kind::i16:
+  case Operand::Kind::u16: {
     int64_t shiftValue = shift.as<int64_t>();
     if (shiftValue < 0 || shiftValue >= 64) {
       return leaf::new_error(std::format(
-          "Invalid shift value in srl instruction: {}", shiftValue));
+          "Invalid shift value in sr instruction: {}", shiftValue));
     }
     switch (source.kind()) {
     case Operand::Kind::reg: {
-      BOOST_LEAF_AUTO(shifted,
-                      srl(context->registerAt(source.as<Index>()), shiftValue));
-      destination = shifted;
+		destination = context->registerAs<int64_t>(source.as<Index>()) >> shiftValue;
       break;
     }
-    case Operand::Kind::i16: {
-      BOOST_LEAF_AUTO(shifted, srl(source.as<uint64_t>(), shiftValue));
-      destination = shifted;
-      break;
-    }
+    case Operand::Kind::i16: 
     case Operand::Kind::u16: {
-      BOOST_LEAF_AUTO(shifted, srl(source.as<uint64_t>(), shiftValue));
-      destination = shifted;
+		destination = source.as<int64_t>() >> shiftValue;
       break;
     }
     default:
       return leaf::new_error(std::format(
-          "Invalid source operand kind in srl instruction: {}", source.kind()));
-    }
-    break;
-  }
-
-  case Operand::Kind::u16: {
-    uint64_t shiftValue = shift.as<uint64_t>();
-    if (shiftValue >= 64) {
-      return leaf::new_error(std::format(
-          "Shift value too large in srl instruction: {}", shiftValue));
-    }
-    switch (source.kind()) {
-    case Operand::Kind::reg: {
-      BOOST_LEAF_AUTO(shifted,
-                      srl(context->registerAt(source.as<Index>()), shiftValue));
-      destination = shifted;
-      break;
-    }
-    case Operand::Kind::i16: {
-      BOOST_LEAF_AUTO(shifted, srl(source.as<uint64_t>(), shiftValue));
-      destination = shifted;
-      break;
-    }
-    case Operand::Kind::u16: {
-      BOOST_LEAF_AUTO(shifted, srl(source.as<uint64_t>(), shiftValue));
-      destination = shifted;
-      break;
-    }
-    default:
-      return leaf::new_error(std::format(
-          "Invalid source operand kind in srl instruction: {}", source.kind()));
+          "Invalid source operand kind in sr instruction: {}", source.kind()));
     }
     break;
   }
 
   default:
     return leaf::new_error(std::format(
-        "Invalid shift operand kind in srl instruction: {}", shift.kind()));
-  }
-  return {};
-}
-
-static leaf::result<void> executeSra(Instruction instruction,
-                                     Context::Ptr context) {
-  Operand a = instruction.a();
-  if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(std::format(
-        "Invalid destination operand kind in sra instruction: {}", a.kind()));
-  }
-  Register &destination = context->registerAt(a.as<Index>());
-  Operand source = instruction.b();
-  Operand shift = instruction.c();
-
-  switch (shift.kind()) {
-  case Operand::Kind::reg: {
-    Register &shiftValue = context->registerAt(shift.as<Index>());
-    if (shiftValue >= 64) {
-      return leaf::new_error(std::format(
-          "Shift value too large in sra instruction: {}", shiftValue));
-    }
-    switch (source.kind()) {
-    case Operand::Kind::reg: {
-      BOOST_LEAF_AUTO(
-          shifted,
-          srl(context->registerAs<int64_t>(source.as<Index>()), shiftValue));
-      destination = shifted;
-      break;
-    }
-    case Operand::Kind::i16: {
-      BOOST_LEAF_AUTO(shifted, srl(source.as<int64_t>(), shiftValue));
-      destination = shifted;
-      break;
-    }
-    case Operand::Kind::u16: {
-      BOOST_LEAF_AUTO(shifted, srl(source.as<int64_t>(), shiftValue));
-      destination = shifted;
-      break;
-    }
-    default:
-      return leaf::new_error(std::format(
-          "Invalid source operand kind in sra instruction: {}", source.kind()));
-    }
-    break;
-  }
-
-  case Operand::Kind::i16: {
-    int64_t shiftValue = shift.as<int64_t>();
-    if (shiftValue < 0 || shiftValue >= 64) {
-      return leaf::new_error(std::format(
-          "Invalid shift value in sra instruction: {}", shiftValue));
-    }
-    switch (source.kind()) {
-    case Operand::Kind::reg: {
-      BOOST_LEAF_AUTO(
-          shifted,
-          sra(context->registerAs<int64_t>(source.as<Index>()), shiftValue));
-      destination = shifted;
-      break;
-    }
-    case Operand::Kind::i16: {
-      BOOST_LEAF_AUTO(shifted, sra(source.as<int64_t>(), shiftValue));
-      destination = shifted;
-      break;
-    }
-    case Operand::Kind::u16: {
-      BOOST_LEAF_AUTO(shifted, sra(source.as<int64_t>(), shiftValue));
-      destination = shifted;
-      break;
-    }
-    default:
-      return leaf::new_error(std::format(
-          "Invalid source operand kind in sra instruction: {}", source.kind()));
-    }
-    break;
-  }
-
-  case Operand::Kind::u16: {
-    uint64_t shiftValue = shift.as<uint64_t>();
-    if (shiftValue >= 64) {
-      return leaf::new_error(std::format(
-          "Shift value too large in sra instruction: {}", shiftValue));
-    }
-    switch (source.kind()) {
-    case Operand::Kind::reg: {
-      BOOST_LEAF_AUTO(
-          shifted,
-          sra(context->registerAs<int64_t>(source.as<Index>()), shiftValue));
-      destination = shifted;
-      break;
-    }
-    case Operand::Kind::i16: {
-      BOOST_LEAF_AUTO(shifted, sra(source.as<int64_t>(), shiftValue));
-      destination = shifted;
-      break;
-    }
-    case Operand::Kind::u16: {
-      BOOST_LEAF_AUTO(shifted, sra(source.as<int64_t>(), shiftValue));
-      destination = shifted;
-      break;
-    }
-    default:
-      return leaf::new_error(std::format(
-          "Invalid source operand kind in sra instruction: {}", source.kind()));
-    }
-    break;
-  }
-  default:
-    return leaf::new_error(std::format(
-        "Invalid shift operand kind in sra instruction: {}", shift.kind()));
+        "Invalid shift operand kind in sr instruction: {}", shift.kind()));
   }
   return {};
 }

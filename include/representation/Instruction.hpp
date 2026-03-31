@@ -30,7 +30,7 @@
 #include <format>
 #include <ostream>
 
-#include "representation/operand.hpp"
+#include "representation/Operand.hpp"
 
 namespace tbc {
 struct Instruction {
@@ -80,9 +80,8 @@ struct Instruction {
     or_,
     xor_,
     not_,
-    sll,
-    srl,
-    sra,
+    sl,
+    sr,
     // rol,
     // ror,
   };
@@ -250,16 +249,12 @@ struct Instruction {
     return {Bitwise::not_, destination, source};
   }
 
-  static Instruction sll(Operand destination, Operand left, Operand right) {
-    return {Bitwise::sll, destination, left, right};
+  static Instruction sl(Operand destination, Operand left, Operand right) {
+    return {Bitwise::sl, destination, left, right};
   }
 
-  static Instruction srl(Operand destination, Operand left, Operand right) {
-    return {Bitwise::srl, destination, left, right};
-  }
-
-  static Instruction sra(Operand destination, Operand left, Operand right) {
-    return {Bitwise::sra, destination, left, right};
+  static Instruction sr(Operand destination, Operand left, Operand right) {
+    return {Bitwise::sr, destination, left, right};
   }
 
   static Instruction eq(Operand destination, Operand left, Operand right) {
@@ -410,12 +405,10 @@ template <> struct std::formatter<tbc::Instruction::Bitwise> {
       return std::format_to(ctx.out(), "xor");
     case tbc::Instruction::Bitwise::not_:
       return std::format_to(ctx.out(), "not");
-    case tbc::Instruction::Bitwise::sll:
-      return std::format_to(ctx.out(), "sll");
-    case tbc::Instruction::Bitwise::srl:
-      return std::format_to(ctx.out(), "srl");
-    case tbc::Instruction::Bitwise::sra:
-      return std::format_to(ctx.out(), "sra");
+    case tbc::Instruction::Bitwise::sl:
+      return std::format_to(ctx.out(), "sl");
+    case tbc::Instruction::Bitwise::sr:
+      return std::format_to(ctx.out(), "sr");
     default:
       return std::format_to(ctx.out(), "unknown: {}",
                             std::to_underlying(bitwise));
@@ -528,16 +521,12 @@ template <> struct std::formatter<tbc::Instruction> {
         return std::format_to(ctx.out(), "not {}, {}", instruction.a(),
                               instruction.b());
 
-      case tbc::Instruction::Bitwise::sll:
-        return std::format_to(ctx.out(), "sll {}, {}, {}", instruction.a(),
+      case tbc::Instruction::Bitwise::sl:
+        return std::format_to(ctx.out(), "sl {}, {}, {}", instruction.a(),
                               instruction.b(), instruction.c());
 
-      case tbc::Instruction::Bitwise::srl:
-        return std::format_to(ctx.out(), "srl {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
-
-      case tbc::Instruction::Bitwise::sra:
-        return std::format_to(ctx.out(), "sra {}, {}, {}", instruction.a(),
+      case tbc::Instruction::Bitwise::sr:
+        return std::format_to(ctx.out(), "sr {}, {}, {}", instruction.a(),
                               instruction.b(), instruction.c());
 
       default:

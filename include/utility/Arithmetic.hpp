@@ -35,15 +35,53 @@ using namespace boost::leaf;
 #endif
 
 namespace tbc {
-inline leaf::result<int64_t> sra(int64_t value, uint8_t amount);
-inline leaf::result<uint64_t> srl(uint64_t value, uint8_t amount);
 inline leaf::result<int64_t> add(int64_t a, int64_t b);
 inline leaf::result<int64_t> sub(int64_t a, int64_t b);
 inline leaf::result<int64_t> mul(int64_t a, int64_t b);
 inline leaf::result<int64_t> div(int64_t a, int64_t b);
 inline leaf::result<int64_t> mod(int64_t a, int64_t b);
 
-#if defined(_MSC_VER)
+#if defined(__GNUC__) || defined(__clang__)
+inline leaf::result<int64_t> add(int64_t a, int64_t b) {
+  int64_t result;
+  if (__builtin_add_overflow(a, b, &result)) {
+    return leaf::new_error(std::format("Integer overflow in add instruction"));
+  }
+  return result;
+}
+inline leaf::result<int64_t> sub(int64_t a, int64_t b) {
+  int64_t result;
+  if (__builtin_sub_overflow(a, b, &result)) {
+    return leaf::new_error(std::format("Integer overflow in sub instruction"));
+  }
+  return result;
+}
+inline leaf::result<int64_t> mul(int64_t a, int64_t b) {
+  int64_t result;
+  if (__builtin_mul_overflow(a, b, &result)) {
+    return leaf::new_error(std::format("Integer overflow in mul instruction"));
+  }
+  return result;
+}
+inline leaf::result<int64_t> div(int64_t a, int64_t b) {
+  if (b == 0) {
+    return leaf::new_error(std::format("Division by zero in div instruction"));
+  }
+  if (a == INT64_MIN && b == -1) {
+    return leaf::new_error(std::format("Integer overflow in div instruction"));
+  }
+  return a / b;
+}
+inline leaf::result<int64_t> mod(int64_t a, int64_t b) {
+  if (b == 0) {
+    return leaf::new_error(std::format("Division by zero in mod instruction"));
+  }
+  if (a == INT64_MIN && b == -1) {
+    return leaf::new_error(std::format("Integer overflow in mod instruction"));
+  }
+  return a % b;
+}
+#elif defined(_MSC_VER)
 #pragma intrinsic(__ll_rshift)
 #pragma intrinsic(__ull_rshift)
 #pragma intrinsic(_add_overflow_i64)
