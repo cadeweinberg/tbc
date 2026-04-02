@@ -41,7 +41,29 @@ else ()
         GIT_REPOSITORY https://github.com/boostorg/boost.git
         GIT_TAG 1bed2b0712b2119f20d66c5053def9173c8462a5
     )
+
+    # Configure Boost to only build what we need
+    set(BOOST_INCLUDE_LIBRARIES program_options test CACHE STRING "")
+    set(BOOST_ENABLE_CMAKE ON CACHE BOOL "")
+
+    # Enable __declspec attribute support for Emscripten
+    if(EMSCRIPTEN)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fms-extensions" CACHE STRING "")
+    endif()
+
     FetchContent_MakeAvailable(Boost)
+    # I don't understand why this is necessary, given that the headers target includes 
+    # leaf when we are using the system level install.
+    if(TARGET Boost::headers AND NOT TARGET Boost::headers_with_leaf)
+        add_library(boost_headers_with_leaf INTERFACE)
+        add_library(Boost::headers_with_leaf ALIAS boost_headers_with_leaf)
+        target_link_libraries(boost_headers_with_leaf INTERFACE Boost::headers)
+        target_include_directories(boost_headers_with_leaf INTERFACE 
+            "${boost_SOURCE_DIR}/libs/leaf/include"
+            "${boost_SOURCE_DIR}/libs/random/include"
+            "${boost_SOURCE_DIR}/libs/integer/include"
+        )
+    endif()
 endif ()
 
 find_program(RE2C re2c REQUIRED

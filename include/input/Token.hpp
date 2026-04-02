@@ -26,9 +26,10 @@
 #define TBC_INPUT_TOKEN_HPP
 
 #include <cstdint>
-#include <format>
+//#include <format>
 #include <ostream>
 #include <string_view>
+
 using namespace std::literals::string_view_literals;
 
 namespace tbc {
@@ -71,27 +72,32 @@ enum class Token : uint8_t {
 
 std::string_view token_to_view(Token token) noexcept;
 
-} // namespace tbc
-
-template <> struct std::formatter<tbc::Token> {
-  template <class ParseContext>
-  constexpr auto parse(ParseContext &ctx) -> ParseContext::iterator {
-    return ctx.begin();
-  }
-
-  template <class FormatContext>
-  constexpr auto format(tbc::Token token, FormatContext &ctx) const
-      -> FormatContext::iterator {
-    return std::format_to(ctx.out(), "{}", token_to_view(token));
-  }
-};
-
-namespace tbc {
 inline std::ostream &operator<<(std::ostream &out, Token token) {
-  out << std::format("{}", token_to_view(token));
+  out << token_to_view(token);
   return out;
 }
+
 } // namespace tbc
+
+//template <> struct std::formatter<tbc::Token> {
+//  template <class ParseContext>
+//  constexpr auto parse(ParseContext &ctx) -> ParseContext::iterator {
+//    return ctx.begin();
+//  }
+//
+//  template <class FormatContext>
+//  constexpr auto format(tbc::Token token, FormatContext &ctx) const
+//      -> FormatContext::iterator {
+//    return std::format_to(ctx.out(), "{}", token_to_view(token));
+//  }
+//};
+//
+//namespace tbc {
+//inline std::ostream &operator<<(std::ostream &out, Token token) {
+//  out << std::format("{}", token_to_view(token));
+//  return out;
+//}
+//} // namespace tbc
 
 
 #endif // !TBC_INPUT_TOKEN_HPP

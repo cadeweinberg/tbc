@@ -38,7 +38,7 @@ set (TBC_COMMON_SOURCE_LIST
     ${TBC_SOURCE_DIR}/input/Lexer.cpp
     ${TBC_SOURCE_DIR}/input/Token.cpp
 )
-target_sources(tbc_common PUBLIC
+target_sources(tbc_common PRIVATE
     ${TBC_COMMON_SOURCE_LIST}
 )
 
@@ -47,10 +47,11 @@ target_include_directories(tbc_common PUBLIC
 )
 
 target_link_libraries(tbc_common PUBLIC 
-    Boost::boost
+    Boost::headers_with_leaf
     Boost::program_options
 )
 
+# Make sure we link in the symbols for std::stacktrace on GCC
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_link_libraries(tbc_common PUBLIC stdc++exp)
 endif ()
@@ -70,4 +71,14 @@ target_include_directories(tbc PRIVATE
 target_link_libraries(tbc PRIVATE
     tbc_common
 )
+
+if (EMSCRIPTEN) 
+    set_target_properties(tbc PROPERTIES SUFFIX ".html")
+    target_link_options(tbc PRIVATE 
+        --shell-file ${TBC_HTML_DIR}/tbc.html
+        -sEXPORTED_FUNCTIONS=_main,_readEvaluatePrint
+        -sEXPORTED_RUNTIME_METHODS=stringToNewUTF8
+        -sMODULARIZE=0
+    )
+endif ()
 

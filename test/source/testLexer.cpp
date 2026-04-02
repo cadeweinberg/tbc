@@ -69,7 +69,7 @@ BOOST_DATA_TEST_CASE(lexer_keywords,
         return tbc::Token::end;
       },
       [&]() -> tbc::Token {
-        BOOST_ERROR(std::stacktrace::current());
+        //BOOST_ERROR(std::stacktrace::current());
         std::abort();
       });
 
@@ -123,7 +123,7 @@ BOOST_DATA_TEST_CASE(lexer_integer, LexerIntegerDataset{} ^ data::xrange(20),
         return tbc::Token::end;
       },
       [&]() -> tbc::Token {
-        BOOST_ERROR(std::stacktrace::current());
+        //BOOST_ERROR(std::stacktrace::current());
         std::abort();
       });
 
@@ -205,7 +205,7 @@ BOOST_DATA_TEST_CASE(lexer_label, LexerLabelDataset{} ^ data::xrange(20), label,
         return tbc::Token::end;
       },
       [&]() -> tbc::Token {
-        BOOST_ERROR(std::stacktrace::current());
+       // BOOST_ERROR(std::stacktrace::current());
         std::abort();
       });
 

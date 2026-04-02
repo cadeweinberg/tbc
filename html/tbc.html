@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Tiny Bytecode Compiler</title>
+</head>
+
+<body>
+    <div>
+        <textarea id="input" rows="5" cols="80" placeholder="Enter input here..."></textarea>
+    </div>
+    <div>
+        <textarea id="output" rows="10" cols="80" readonly></textarea>
+    </div>
+    <button onclick="runWithInput()">Run</button>
+
+    <script type='text/javascript'>
+        var inputElement = document.getElementById('input');
+        var outputElement = document.getElementById('output');
+        var readEvaluatePrint = null;
+
+        var Module = {
+            print: function(...args) {
+                outputElement.value += args.join(' ') + '\n';
+                outputElement.scrollTop = outputElement.scrollHeight;
+            },
+            printErr: function(...args) {
+                outputElement.value += 'ERROR: ' + args.join(' ') + '\n';
+                outputElement.scrollTop = outputElement.scrollHeight;
+            },
+            onRuntimeInitialized: function() {
+                console.log('WebAssembly module loaded and ready');
+            }
+        };
+
+        function runWithInput() {
+            let input = inputElement.value;
+            if (!input) {
+                outputElement.value += 'No input provided.\n';
+                return;
+            }
+
+            try {
+                var inputPtr = stringToNewUTF8(input);
+                _readEvaluatePrint(inputPtr);
+            } catch (e) {
+                outputElement.value += 'Error: ' + e.message + '\n';
+            }
+        };
+    </script>
+    {{{ SCRIPT }}}
+</body>
+</html>

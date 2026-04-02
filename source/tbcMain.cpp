@@ -31,15 +31,66 @@
 namespace po = boost::program_options;
 
 #include "algorithm/Execute.hpp"
-#include "utility/Error.hpp"
 #include "input/Parser.hpp"
 #include "representation/Context.hpp"
+#include "utility/Error.hpp"
 
-int main(int argc, char** argv) {
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+
+tbc::Context::Ptr context;
+
+EMSCRIPTEN_KEEPALIVE
+int main() {
+  context = tbc::Context::create();
+  return EXIT_SUCCESS;
+}
+
+extern "C" {
+EMSCRIPTEN_KEEPALIVE
+void readEvaluatePrint(char *input) {
+  tbc::Parser parser{context};
+  bool hasError = false;
+
+  parser.set(input);
+
+  leaf::try_handle_all([&]() -> leaf::result<void> { return parser.pull(); },
+                       [&](tbc::Error const &error) {
+                         std::cerr << error << "\n";
+                         hasError = true;
+                       },
+                       [&]() { std::abort(); });
+
+  if (hasError) {
+    return;
+  }
+
+  leaf::try_handle_all(
+      [&]() -> leaf::result<void> { return tbc::execute(context); },
+      [&](tbc::Error const &error) {
+        std::cerr << error << "\n";
+        hasError = true;
+      },
+      [&]() { std::abort(); });
+
+  if (hasError) {
+    return;
+  }
+
+  std::cout << "$ " << *context->getResult() << "\n";
+  std::cout << *context->getExpression();
+
+  free(input);
+}
+}
+
+#else
+static void readEvaluatePrint(tbc::Context::Ptr context);
+
+int main(int argc, char **argv) {
   po::options_description desc("tbc [options]");
-  desc.add_options()
-      ("help,h", "Print this help message")
-      ("version,v", "Print program version");
+  desc.add_options()("help,h", "Print this help message")(
+      "version,v", "Print program version");
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -56,27 +107,35 @@ int main(int argc, char** argv) {
   }
 
   tbc::Context::Ptr context = tbc::Context::create();
-  tbc::Parser parser{context};
 
   while (true) {
-    std::cout << ">> ";
-    std::string input{};
-    std::getline(std::cin, input);
-
-    parser.set(input);
-
-    leaf::try_handle_all(
-        [&]() -> leaf::result<void> { return parser.pull(); },
-        [&](tbc::Error const &error) { std::cerr << error << "\n"; },
-        [&]() { std::abort(); }
-    );
-
-    leaf::try_handle_all(
-        [&]() -> leaf::result<void> { return tbc::execute(context); },
-        [&](std::string const &error) { std::cerr << error << "\n"; },
-        [&]() { std::abort(); });
-
-    std::cout << "$ " << *context->getResult() << "\n";
-    std::cout << *context->getExpression();
+    readEvaluatePrint(context);
   }
+
+  return EXIT_SUCCESS;
 }
+
+static void readEvaluatePrint(tbc::Context::Ptr context) {
+  tbc::Parser parser{context};
+
+  std::cout << ">> ";
+  std::string input{};
+  std::getline(std::cin, input);
+
+  parser.set(input);
+
+  leaf::try_handle_all(
+      [&]() -> leaf::result<void> { return parser.pull(); },
+      [&](tbc::Error const &error) { std::cerr << error << "\n"; },
+      [&]() { std::abort(); });
+
+  leaf::try_handle_all(
+      [&]() -> leaf::result<void> { return tbc::execute(context); },
+      [&](tbc::Error const &error) { std::cerr << error << "\n"; },
+      [&]() { std::abort(); });
+
+  std::cout << "$ " << *context->getResult() << "\n";
+  std::cout << *context->getExpression();
+}
+
+#endif

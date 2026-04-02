@@ -17,7 +17,8 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_CXX_STANDARD": "23",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/debug",
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "WEB_BUILD": "OFF"
       }
     },
     {
@@ -30,7 +31,8 @@
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_CXX_STANDARD": "23",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/release",
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "WEB_BUILD": "OFF"
       }
     },
     {
@@ -44,7 +46,8 @@
         "CMAKE_CXX_STANDARD": "23",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/debug_web",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-        "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+        "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+        "WEB_BUILD" : "ON"
       }
     },
     {
@@ -58,7 +61,8 @@
         "CMAKE_CXX_STANDARD": "23",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/release_web",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-        "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+        "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+        "WEB_BUILD": "ON"
       }
     }
   ],

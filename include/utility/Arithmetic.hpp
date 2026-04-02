@@ -30,6 +30,8 @@
 
 using namespace boost::leaf;
 
+#include "utility/Error.hpp"
+
 #if defined(_MSC_VER)
 #include <intrin.h>
 #endif
@@ -45,39 +47,45 @@ inline leaf::result<int64_t> mod(int64_t a, int64_t b);
 inline leaf::result<int64_t> add(int64_t a, int64_t b) {
   int64_t result;
   if (__builtin_add_overflow(a, b, &result)) {
-    return leaf::new_error(std::format("Integer overflow in add instruction"));
+    return leaf::new_error(Error::create("Integer overflow in add instruction"));
   }
   return result;
 }
 inline leaf::result<int64_t> sub(int64_t a, int64_t b) {
   int64_t result;
   if (__builtin_sub_overflow(a, b, &result)) {
-    return leaf::new_error(std::format("Integer overflow in sub instruction"));
+    return leaf::new_error(
+        Error::create("Integer overflow in sub instruction"));
   }
   return result;
 }
 inline leaf::result<int64_t> mul(int64_t a, int64_t b) {
   int64_t result;
   if (__builtin_mul_overflow(a, b, &result)) {
-    return leaf::new_error(std::format("Integer overflow in mul instruction"));
+    return leaf::new_error(
+        Error::create("Integer overflow in mul instruction"));
   }
   return result;
 }
 inline leaf::result<int64_t> div(int64_t a, int64_t b) {
   if (b == 0) {
-    return leaf::new_error(std::format("Division by zero in div instruction"));
+    return leaf::new_error(
+        Error::create("Division by zero in div instruction"));
   }
   if (a == INT64_MIN && b == -1) {
-    return leaf::new_error(std::format("Integer overflow in div instruction"));
+    return leaf::new_error(
+        Error::create("Integer overflow in div instruction"));
   }
   return a / b;
 }
 inline leaf::result<int64_t> mod(int64_t a, int64_t b) {
   if (b == 0) {
-    return leaf::new_error(std::format("Division by zero in mod instruction"));
+    return leaf::new_error(
+        Error::create("Division by zero in mod instruction"));
   }
   if (a == INT64_MIN && b == -1) {
-    return leaf::new_error(std::format("Integer overflow in mod instruction"));
+    return leaf::new_error(
+        Error::create("Integer overflow in mod instruction"));
   }
   return a % b;
 }
@@ -91,7 +99,7 @@ inline leaf::result<int64_t> mod(int64_t a, int64_t b) {
 inline leaf::result<int64_t> sra(int64_t value, uint8_t amount) {
   if (amount >= 64) {
     return leaf::new_error(
-        std::format("Shift value too large in sra instruction: {}", amount));
+        Error::create("Shift value too large in sra instruction: {}", amount));
   }
   return __ll_rshift(value, amount);
 }
@@ -99,7 +107,7 @@ inline leaf::result<int64_t> sra(int64_t value, uint8_t amount) {
 inline leaf::result<uint64_t> srl(uint64_t value, uint8_t amount) {
   if (amount >= 64) {
     return leaf::new_error(
-        std::format("Shift value too large in srl instruction: {}", amount));
+        Error::create("Shift value too large in srl instruction: {}", amount));
   }
   return __ull_rshift(value, amount);
 }
@@ -108,7 +116,8 @@ inline leaf::result<int64_t> add(int64_t a, int64_t b) {
   uint8_t carry_in = 0, carry_out = 0;
   int64_t result;
   if (carry_out = _add_overflow_i64(carry_in, a, b, &result)) {
-    return leaf::new_error(std::format("Integer overflow in add instruction"));
+    return leaf::new_error(
+        Error::create("Integer overflow in add instruction"));
   }
   return result;
 }
@@ -117,7 +126,8 @@ inline leaf::result<int64_t> sub(int64_t a, int64_t b) {
   uint8_t carry_in = 1, carry_out = 0;
   int64_t result;
   if (carry_out = _sub_overflow_i64(carry_in, a, b, &result)) {
-    return leaf::new_error(std::format("Integer overflow in sub instruction"));
+    return leaf::new_error(
+        Error::create("Integer overflow in sub instruction"));
   }
   return result;
 }
@@ -125,27 +135,32 @@ inline leaf::result<int64_t> sub(int64_t a, int64_t b) {
 inline leaf::result<int64_t> mul(int64_t a, int64_t b) {
   int64_t result;
   if (_mul_overflow_i64(a, b, &result)) {
-    return leaf::new_error(std::format("Integer overflow in mul instruction"));
+    return leaf::new_error(
+        Error::create("Integer overflow in mul instruction"));
   }
   return result;
 }
 
 inline leaf::result<int64_t> div(int64_t a, int64_t b) {
   if (b == 0) {
-    return leaf::new_error(std::format("Division by zero in div instruction"));
+    return leaf::new_error(
+        Error::create("Division by zero in div instruction"));
   }
   if (a == INT64_MIN && b == -1) {
-    return leaf::new_error(std::format("Integer overflow in div instruction"));
+    return leaf::new_error(
+        Error::create("Integer overflow in div instruction"));
   }
   return a / b;
 }
 
 inline leaf::result<int64_t> mod(int64_t a, int64_t b) {
   if (b == 0) {
-    return leaf::new_error(std::format("Division by zero in mod instruction"));
+    return leaf::new_error(
+        Error::create("Division by zero in mod instruction"));
   }
   if (a == INT64_MIN && b == -1) {
-    return leaf::new_error(std::format("Integer overflow in mod instruction"));
+    return leaf::new_error(
+        Error::create("Integer overflow in mod instruction"));
   }
   return a % b;
 }

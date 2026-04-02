@@ -27,10 +27,11 @@
 #define TBC_IMR_EXPRESSION_HPP
 
 #include <cstdint>
-#include <format>
+//#include <format>
 #include <memory>
 #include <ostream>
 #include <vector>
+//#include <string>
 
 #include "representation/Instruction.hpp"
 
@@ -46,35 +47,43 @@ public:
 
   static Ptr create() { return std::make_shared<Expression>(Private{}); }
 };
-}
 
-template <> struct std::formatter<tbc::Expression> {
-  template <class ParseContext> constexpr auto parse(ParseContext &ctx) const {
-    return ctx.begin();
-  }
-  template <class FormatContext>
-  constexpr auto format(const tbc::Expression &expression, FormatContext &ctx) const
-      -> decltype(ctx.out()) {
-    // size_t index = 0;
-    for (const auto &instruction : expression) {
-      std::format_to(ctx.out(), "{}\n", instruction);
-
-      //if (index < (expression.size() - 1)) {
-      //  std::format_to(ctx.out(), "\n");
-      //}
-
-      //index += 1;
-    }
-    return ctx.out();
-  }
-};
-
-namespace tbc {
 inline auto operator<<(std::ostream &out, const Expression &expression)
     -> std::ostream & {
-  out << std::format("{}", expression);
+  for (const Instruction instruction : expression) {
+    out << instruction << "\n";
+  }
   return out;
 }
 } // namespace tbc
+//
+//template <> struct std::formatter<tbc::Expression> {
+//  template <class ParseContext> constexpr auto parse(ParseContext &ctx) const {
+//    return ctx.begin();
+//  }
+//  template <class FormatContext>
+//  constexpr auto format(const tbc::Expression &expression, FormatContext &ctx) const
+//      -> decltype(ctx.out()) {
+//    // size_t index = 0;
+//    for (const auto &instruction : expression) {
+//      std::format_to(ctx.out(), "{}\n", instruction);
+//
+//      //if (index < (expression.size() - 1)) {
+//      //  std::format_to(ctx.out(), "\n");
+//      //}
+//
+//      //index += 1;
+//    }
+//    return ctx.out();
+//  }
+//};
+//
+//namespace tbc {
+//inline auto operator<<(std::ostream &out, const Expression &expression)
+//    -> std::ostream & {
+//  out << std::format("{}", expression);
+//  return out;
+//}
+//} // namespace tbc
 
 #endif // !TBC_IMR_EXPRESSION_HPP

@@ -27,8 +27,10 @@
 #define TBC_REPRESENTATION_INSTRUCTION_HPP
 
 #include <cstdint>
-#include <format>
-#include <ostream>
+// #include <format>
+ #include <ostream>
+//#include <string>
+#include <utility>
 
 #include "representation/Operand.hpp"
 
@@ -322,288 +324,421 @@ struct Instruction {
   }
 };
 
-} // namespace tbc
-
-template <> struct std::formatter<tbc::Instruction::Kind> {
-  template <class ParseContext>
-  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
-    return ctx.begin();
-  }
-  template <class FormatContext>
-  auto format(tbc::Instruction::Kind m_kind, FormatContext &ctx) const
-      -> FormatContext::iterator {
-    switch (m_kind) {
-    case tbc::Instruction::Kind::control:
-      return std::format_to(ctx.out(), "control");
-    case tbc::Instruction::Kind::memory:
-      return std::format_to(ctx.out(), "memory");
-    case tbc::Instruction::Kind::bitwise:
-      return std::format_to(ctx.out(), "bitwise");
-    case tbc::Instruction::Kind::comparison:
-      return std::format_to(ctx.out(), "comparison");
-    case tbc::Instruction::Kind::integral:
-      return std::format_to(ctx.out(), "integral");
-    default:
-      return std::format_to(ctx.out(), "unknown: {}",
-                            std::to_underlying(m_kind));
-    }
-  }
-};
-
-template <> struct std::formatter<tbc::Instruction::Control> {
-  template <class ParseContext>
-  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
-    return ctx.begin();
-  }
-  template <class FormatContext>
-  auto format(tbc::Instruction::Control control, FormatContext &ctx) const
-      -> FormatContext::iterator {
-    switch (control) {
-    case tbc::Instruction::Control::ret:
-      return std::format_to(ctx.out(), "ret");
-    default:
-      return std::format_to(ctx.out(), "unknown: {}",
-                            std::to_underlying(control));
-    }
-  }
-};
-
-template <> struct std::formatter<tbc::Instruction::Memory> {
-  template <class ParseContext>
-  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
-    return ctx.begin();
-  }
-  template <class FormatContext>
-  auto format(tbc::Instruction::Memory memory, FormatContext &ctx) const
-      -> FormatContext::iterator {
-    switch (memory) {
-    case tbc::Instruction::Memory::mv:
-      return std::format_to(ctx.out(), "mv");
-    case tbc::Instruction::Memory::mvu:
-      return std::format_to(ctx.out(), "mvu");
-    default:
-      return std::format_to(ctx.out(), "unknown: {}",
-                            std::to_underlying(memory));
-    }
-  }
-};
-
-template <> struct std::formatter<tbc::Instruction::Bitwise> {
-  template <class ParseContext>
-  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
-    return ctx.begin();
-  }
-  template <class FormatContext>
-  auto format(tbc::Instruction::Bitwise bitwise, FormatContext &ctx) const
-      -> FormatContext::iterator {
-    switch (bitwise) {
-    case tbc::Instruction::Bitwise::and_:
-      return std::format_to(ctx.out(), "and");
-    case tbc::Instruction::Bitwise::or_:
-      return std::format_to(ctx.out(), "or");
-    case tbc::Instruction::Bitwise::xor_:
-      return std::format_to(ctx.out(), "xor");
-    case tbc::Instruction::Bitwise::not_:
-      return std::format_to(ctx.out(), "not");
-    case tbc::Instruction::Bitwise::sl:
-      return std::format_to(ctx.out(), "sl");
-    case tbc::Instruction::Bitwise::sr:
-      return std::format_to(ctx.out(), "sr");
-    default:
-      return std::format_to(ctx.out(), "unknown: {}",
-                            std::to_underlying(bitwise));
-    }
-  }
-};
-
-template <> struct std::formatter<tbc::Instruction::Comparison> {
-  template <class ParseContext>
-  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
-    return ctx.begin();
-  }
-  template <class FormatContext>
-  auto format(tbc::Instruction::Comparison comparison, FormatContext &ctx) const
-      -> FormatContext::iterator {
-    switch (comparison) {
-    case tbc::Instruction::Comparison::eq:
-      return std::format_to(ctx.out(), "eq");
-    case tbc::Instruction::Comparison::lt:
-      return std::format_to(ctx.out(), "lt");
-    case tbc::Instruction::Comparison::lte:
-      return std::format_to(ctx.out(), "lte");
-    case tbc::Instruction::Comparison::slt:
-      return std::format_to(ctx.out(), "slt");
-    case tbc::Instruction::Comparison::slte:
-      return std::format_to(ctx.out(), "slte");
-    default:
-      return std::format_to(ctx.out(), "unknown: {}",
-                            std::to_underlying(comparison));
-    }
-  }
-};
-
-template <> struct std::formatter<tbc::Instruction::Integral> {
-  template <class ParseContext>
-  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
-    return ctx.begin();
-  }
-  template <class FormatContext>
-  auto format(tbc::Instruction::Integral code, FormatContext &ctx) const
-      -> FormatContext::iterator {
-    switch (code) {
-    case tbc::Instruction::Integral::neg:
-      return std::format_to(ctx.out(), "neg");
-    case tbc::Instruction::Integral::add:
-      return std::format_to(ctx.out(), "add");
-    case tbc::Instruction::Integral::sub:
-      return std::format_to(ctx.out(), "sub");
-    case tbc::Instruction::Integral::mul:
-      return std::format_to(ctx.out(), "mul");
-    case tbc::Instruction::Integral::div:
-      return std::format_to(ctx.out(), "div");
-    case tbc::Instruction::Integral::mod:
-      return std::format_to(ctx.out(), "mod");
-    default:
-      return std::format_to(ctx.out(), "unknown: {}", std::to_underlying(code));
-    }
-  }
-};
-
-template <> struct std::formatter<tbc::Instruction> {
-  template <class ParseContext>
-  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
-    return ctx.begin();
-  }
-
-  template <class FormatContext>
-  auto format(tbc::Instruction instruction, FormatContext &ctx) const
-      -> FormatContext::iterator {
-    switch (static_cast<tbc::Instruction::Kind>(instruction.m_kind)) {
+inline std::ostream& operator<<(std::ostream& out, Instruction instruction) {
+    switch (instruction.kind()) {
     case tbc::Instruction::Kind::control: {
-      switch (static_cast<tbc::Instruction::Control>(instruction.m_code)) {
+      switch (instruction.code<tbc::Instruction::Control>()) {
       case tbc::Instruction::Control::ret:
-        return std::format_to(ctx.out(), "ret {}", instruction.a());
+        out << "ret " << instruction.a();
+        break;
       default:
-        return std::format_to(ctx.out(), "unknown: {}",
-                              static_cast<uint16_t>(instruction.m_code));
+        out << "<invalid> " << instruction.m_code;
+        break;
       }
+      break;
     }
 
     case tbc::Instruction::Kind::memory: {
-      switch (static_cast<tbc::Instruction::Memory>(instruction.m_code)) {
+      switch (instruction.code<tbc::Instruction::Memory>()) {
       case tbc::Instruction::Memory::mv:
-        return std::format_to(ctx.out(), "mv {}, {}", instruction.a(),
-                              instruction.b());
+        out << "mv " << instruction.a() << ", " << instruction.b();
+        break;
       case tbc::Instruction::Memory::mvu:
-        return std::format_to(ctx.out(), "mvu {}, {}", instruction.a(),
-                              instruction.b());
+        out << "mvu " << instruction.a() << ", " << instruction.b();
+        break;
       default:
-        return std::format_to(ctx.out(), "unknown: {}",
-                              static_cast<uint16_t>(instruction.m_code));
+        out << "<invalid> " << instruction.m_code;
+        break;
       }
+      break;
     }
 
     case tbc::Instruction::Kind::bitwise: {
-      switch (static_cast<tbc::Instruction::Bitwise>(instruction.m_code)) {
+      switch (instruction.code<tbc::Instruction::Bitwise>()) {
       case tbc::Instruction::Bitwise::and_:
-        return std::format_to(ctx.out(), "and {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
-
+        out << "and " << instruction.a() << ", " << instruction.b() << ", " << instruction.c();
+        break;
       case tbc::Instruction::Bitwise::or_:
-        return std::format_to(ctx.out(), "or {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
-
+        out << "or " << instruction.a() << ", " << instruction.b() << ", "
+            << instruction.c();
+        break;
       case tbc::Instruction::Bitwise::xor_:
-        return std::format_to(ctx.out(), "xor {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
-
+        out << "xor " << instruction.a() << ", " << instruction.b() << ", "
+            << instruction.c();
+        break;
       case tbc::Instruction::Bitwise::not_:
-        return std::format_to(ctx.out(), "not {}, {}", instruction.a(),
-                              instruction.b());
-
+        out << "not " << instruction.a() << ", " << instruction.b();
+        break;
       case tbc::Instruction::Bitwise::sl:
-        return std::format_to(ctx.out(), "sl {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
-
+        out << "sl " << instruction.a() << ", " << instruction.b() << ", "
+            << instruction.c();
+        break;
       case tbc::Instruction::Bitwise::sr:
-        return std::format_to(ctx.out(), "sr {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
-
+        out << "sr " << instruction.a() << ", " << instruction.b() << ", "
+            << instruction.c();
+        break;
       default:
-        return std::format_to(ctx.out(), "unknown: {}",
-                              static_cast<uint16_t>(instruction.m_code));
+        out << "<invalid> " << instruction.m_code;
+        break;
       }
+      break;
     }
 
     case tbc::Instruction::Kind::comparison: {
-      switch (static_cast<tbc::Instruction::Comparison>(instruction.m_code)) {
+      switch (instruction.code<tbc::Instruction::Comparison>()) {
       case tbc::Instruction::Comparison::eq:
-        return std::format_to(ctx.out(), "eq {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
-
+        out << "eq " << instruction.a() << ", " << instruction.b() << ", "
+            << instruction.c();
+        break;
       case tbc::Instruction::Comparison::neq:
-        return std::format_to(ctx.out(), "neq {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
-
+        out << "neq " << instruction.a() << ", " << instruction.b() << ", "
+            << instruction.c();
+        break;
       case tbc::Instruction::Comparison::lt:
-        return std::format_to(ctx.out(), "lt {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
-
+        out << "lt " << instruction.a() << ", " << instruction.b() << ", "
+            << instruction.c();
+        break;
       case tbc::Instruction::Comparison::lte:
-        return std::format_to(ctx.out(), "lte {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
-
+        out << "lte " << instruction.a() << ", " << instruction.b() << ", "
+            << instruction.c();
+        break;
       case tbc::Instruction::Comparison::slt:
-        return std::format_to(ctx.out(), "slt {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
-
+        out << "slt " << instruction.a() << ", " << instruction.b() << ", "
+            << instruction.c();
+        break;
       case tbc::Instruction::Comparison::slte:
-        return std::format_to(ctx.out(), "slte {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
-
+        out << "slte " << instruction.a() << ", " << instruction.b() << ", "
+            << instruction.c();
+        break;
       default:
-        return std::format_to(ctx.out(), "unknown: {}",
-                              static_cast<uint16_t>(instruction.m_code));
+        out << "<invalid> " << instruction.m_code;
+        break;
       }
+      break;
     }
 
     case tbc::Instruction::Kind::integral: {
-      switch (static_cast<tbc::Instruction::Integral>(instruction.m_code)) {
+      switch (instruction.code<tbc::Instruction::Integral>()) {
       case tbc::Instruction::Integral::neg:
-        return std::format_to(ctx.out(), "neg {}, {}", instruction.a(),
-                              instruction.b());
+        out << "neg " << instruction.a() << ", " << instruction.b();
+        break;
       case tbc::Instruction::Integral::add:
-        return std::format_to(ctx.out(), "add {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
+        out << "add " << instruction.a() << ", " << instruction.b() << ", "
+            << instruction.c();
+        break;
       case tbc::Instruction::Integral::sub:
-        return std::format_to(ctx.out(), "sub {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
+        out << "sub " << instruction.a() << ", " << instruction.b() << ", "
+            << instruction.c();
+        break;
       case tbc::Instruction::Integral::mul:
-        return std::format_to(ctx.out(), "mul {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
+        out << "mul " << instruction.a() << ", " << instruction.b() << ", "
+            << instruction.c();
+        break;
       case tbc::Instruction::Integral::div:
-        return std::format_to(ctx.out(), "div {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
+        out << "div " << instruction.a() << ", " << instruction.b() << ", "
+            << instruction.c();
+        break;
       case tbc::Instruction::Integral::mod:
-        return std::format_to(ctx.out(), "mod {}, {}, {}", instruction.a(),
-                              instruction.b(), instruction.c());
-
+        out << "mod " << instruction.a() << ", " << instruction.b() << ", "
+            << instruction.c();
+        break;
       default:
-        return std::format_to(ctx.out(), "unknown: {}",
-                              static_cast<uint16_t>(instruction.m_code));
+        out << "<invalid> " << instruction.m_code;
+        break;
       }
+      break;
     }
+    default:
+      out << "<invalid> " << instruction.m_code;
+      break;
     }
-    return ctx.out();
-  }
-};
-
-namespace tbc {
-inline auto operator<<(std::ostream &out, Instruction instruction)
-    -> std::ostream & {
-  out << std::format("{}", instruction);
-  return out;
+    return out;
 }
+
 } // namespace tbc
+//
+// template <> struct std::formatter<tbc::Instruction::Kind> {
+//  template <class ParseContext>
+//  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
+//    return ctx.begin();
+//  }
+//  template <class FormatContext>
+//  auto format(tbc::Instruction::Kind m_kind, FormatContext &ctx) const
+//      -> FormatContext::iterator {
+//    switch (m_kind) {
+//    case tbc::Instruction::Kind::control:
+//      return std::format_to(ctx.out(), "control");
+//    case tbc::Instruction::Kind::memory:
+//      return std::format_to(ctx.out(), "memory");
+//    case tbc::Instruction::Kind::bitwise:
+//      return std::format_to(ctx.out(), "bitwise");
+//    case tbc::Instruction::Kind::comparison:
+//      return std::format_to(ctx.out(), "comparison");
+//    case tbc::Instruction::Kind::integral:
+//      return std::format_to(ctx.out(), "integral");
+//    default:
+//      return std::format_to(ctx.out(), "unknown: {}",
+//                            std::to_underlying(m_kind));
+//    }
+//  }
+//};
+//
+// template <> struct std::formatter<tbc::Instruction::Control> {
+//  template <class ParseContext>
+//  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
+//    return ctx.begin();
+//  }
+//  template <class FormatContext>
+//  auto format(tbc::Instruction::Control control, FormatContext &ctx) const
+//      -> FormatContext::iterator {
+//    switch (control) {
+//    case tbc::Instruction::Control::ret:
+//      return std::format_to(ctx.out(), "ret");
+//    default:
+//      return std::format_to(ctx.out(), "unknown: {}",
+//                            std::to_underlying(control));
+//    }
+//  }
+//};
+//
+// template <> struct std::formatter<tbc::Instruction::Memory> {
+//  template <class ParseContext>
+//  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
+//    return ctx.begin();
+//  }
+//  template <class FormatContext>
+//  auto format(tbc::Instruction::Memory memory, FormatContext &ctx) const
+//      -> FormatContext::iterator {
+//    switch (memory) {
+//    case tbc::Instruction::Memory::mv:
+//      return std::format_to(ctx.out(), "mv");
+//    case tbc::Instruction::Memory::mvu:
+//      return std::format_to(ctx.out(), "mvu");
+//    default:
+//      return std::format_to(ctx.out(), "unknown: {}",
+//                            std::to_underlying(memory));
+//    }
+//  }
+//};
+//
+// template <> struct std::formatter<tbc::Instruction::Bitwise> {
+//  template <class ParseContext>
+//  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
+//    return ctx.begin();
+//  }
+//  template <class FormatContext>
+//  auto format(tbc::Instruction::Bitwise bitwise, FormatContext &ctx) const
+//      -> FormatContext::iterator {
+//    switch (bitwise) {
+//    case tbc::Instruction::Bitwise::and_:
+//      return std::format_to(ctx.out(), "and");
+//    case tbc::Instruction::Bitwise::or_:
+//      return std::format_to(ctx.out(), "or");
+//    case tbc::Instruction::Bitwise::xor_:
+//      return std::format_to(ctx.out(), "xor");
+//    case tbc::Instruction::Bitwise::not_:
+//      return std::format_to(ctx.out(), "not");
+//    case tbc::Instruction::Bitwise::sl:
+//      return std::format_to(ctx.out(), "sl");
+//    case tbc::Instruction::Bitwise::sr:
+//      return std::format_to(ctx.out(), "sr");
+//    default:
+//      return std::format_to(ctx.out(), "unknown: {}",
+//                            std::to_underlying(bitwise));
+//    }
+//  }
+//};
+//
+// template <> struct std::formatter<tbc::Instruction::Comparison> {
+//  template <class ParseContext>
+//  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
+//    return ctx.begin();
+//  }
+//  template <class FormatContext>
+//  auto format(tbc::Instruction::Comparison comparison, FormatContext &ctx)
+//  const
+//      -> FormatContext::iterator {
+//    switch (comparison) {
+//    case tbc::Instruction::Comparison::eq:
+//      return std::format_to(ctx.out(), "eq");
+//    case tbc::Instruction::Comparison::lt:
+//      return std::format_to(ctx.out(), "lt");
+//    case tbc::Instruction::Comparison::lte:
+//      return std::format_to(ctx.out(), "lte");
+//    case tbc::Instruction::Comparison::slt:
+//      return std::format_to(ctx.out(), "slt");
+//    case tbc::Instruction::Comparison::slte:
+//      return std::format_to(ctx.out(), "slte");
+//    default:
+//      return std::format_to(ctx.out(), "unknown: {}",
+//                            std::to_underlying(comparison));
+//    }
+//  }
+//};
+//
+// template <> struct std::formatter<tbc::Instruction::Integral> {
+//  template <class ParseContext>
+//  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
+//    return ctx.begin();
+//  }
+//  template <class FormatContext>
+//  auto format(tbc::Instruction::Integral code, FormatContext &ctx) const
+//      -> FormatContext::iterator {
+//    switch (code) {
+//    case tbc::Instruction::Integral::neg:
+//      return std::format_to(ctx.out(), "neg");
+//    case tbc::Instruction::Integral::add:
+//      return std::format_to(ctx.out(), "add");
+//    case tbc::Instruction::Integral::sub:
+//      return std::format_to(ctx.out(), "sub");
+//    case tbc::Instruction::Integral::mul:
+//      return std::format_to(ctx.out(), "mul");
+//    case tbc::Instruction::Integral::div:
+//      return std::format_to(ctx.out(), "div");
+//    case tbc::Instruction::Integral::mod:
+//      return std::format_to(ctx.out(), "mod");
+//    default:
+//      return std::format_to(ctx.out(), "unknown: {}",
+//      std::to_underlying(code));
+//    }
+//  }
+//};
+//
+// template <> struct std::formatter<tbc::Instruction> {
+//  template <class ParseContext>
+//  constexpr auto parse(ParseContext &ctx) const -> ParseContext::iterator {
+//    return ctx.begin();
+//  }
+//
+//  template <class FormatContext>
+//  auto format(tbc::Instruction instruction, FormatContext &ctx) const
+//      -> FormatContext::iterator {
+//    switch (static_cast<tbc::Instruction::Kind>(instruction.m_kind)) {
+//    case tbc::Instruction::Kind::control: {
+//      switch (static_cast<tbc::Instruction::Control>(instruction.m_code)) {
+//      case tbc::Instruction::Control::ret:
+//        return std::format_to(ctx.out(), "ret {}", instruction.a());
+//      default:
+//        return std::format_to(ctx.out(), "unknown: {}",
+//                              static_cast<uint16_t>(instruction.m_code));
+//      }
+//    }
+//
+//    case tbc::Instruction::Kind::memory: {
+//      switch (static_cast<tbc::Instruction::Memory>(instruction.m_code)) {
+//      case tbc::Instruction::Memory::mv:
+//        return std::format_to(ctx.out(), "mv {}, {}", instruction.a(),
+//                              instruction.b());
+//      case tbc::Instruction::Memory::mvu:
+//        return std::format_to(ctx.out(), "mvu {}, {}", instruction.a(),
+//                              instruction.b());
+//      default:
+//        return std::format_to(ctx.out(), "unknown: {}",
+//                              static_cast<uint16_t>(instruction.m_code));
+//      }
+//    }
+//
+//    case tbc::Instruction::Kind::bitwise: {
+//      switch (static_cast<tbc::Instruction::Bitwise>(instruction.m_code)) {
+//      case tbc::Instruction::Bitwise::and_:
+//        return std::format_to(ctx.out(), "and {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//
+//      case tbc::Instruction::Bitwise::or_:
+//        return std::format_to(ctx.out(), "or {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//
+//      case tbc::Instruction::Bitwise::xor_:
+//        return std::format_to(ctx.out(), "xor {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//
+//      case tbc::Instruction::Bitwise::not_:
+//        return std::format_to(ctx.out(), "not {}, {}", instruction.a(),
+//                              instruction.b());
+//
+//      case tbc::Instruction::Bitwise::sl:
+//        return std::format_to(ctx.out(), "sl {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//
+//      case tbc::Instruction::Bitwise::sr:
+//        return std::format_to(ctx.out(), "sr {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//
+//      default:
+//        return std::format_to(ctx.out(), "unknown: {}",
+//                              static_cast<uint16_t>(instruction.m_code));
+//      }
+//    }
+//
+//    case tbc::Instruction::Kind::comparison: {
+//      switch (static_cast<tbc::Instruction::Comparison>(instruction.m_code)) {
+//      case tbc::Instruction::Comparison::eq:
+//        return std::format_to(ctx.out(), "eq {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//
+//      case tbc::Instruction::Comparison::neq:
+//        return std::format_to(ctx.out(), "neq {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//
+//      case tbc::Instruction::Comparison::lt:
+//        return std::format_to(ctx.out(), "lt {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//
+//      case tbc::Instruction::Comparison::lte:
+//        return std::format_to(ctx.out(), "lte {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//
+//      case tbc::Instruction::Comparison::slt:
+//        return std::format_to(ctx.out(), "slt {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//
+//      case tbc::Instruction::Comparison::slte:
+//        return std::format_to(ctx.out(), "slte {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//
+//      default:
+//        return std::format_to(ctx.out(), "unknown: {}",
+//                              static_cast<uint16_t>(instruction.m_code));
+//      }
+//    }
+//
+//    case tbc::Instruction::Kind::integral: {
+//      switch (static_cast<tbc::Instruction::Integral>(instruction.m_code)) {
+//      case tbc::Instruction::Integral::neg:
+//        return std::format_to(ctx.out(), "neg {}, {}", instruction.a(),
+//                              instruction.b());
+//      case tbc::Instruction::Integral::add:
+//        return std::format_to(ctx.out(), "add {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//      case tbc::Instruction::Integral::sub:
+//        return std::format_to(ctx.out(), "sub {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//      case tbc::Instruction::Integral::mul:
+//        return std::format_to(ctx.out(), "mul {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//      case tbc::Instruction::Integral::div:
+//        return std::format_to(ctx.out(), "div {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//      case tbc::Instruction::Integral::mod:
+//        return std::format_to(ctx.out(), "mod {}, {}, {}", instruction.a(),
+//                              instruction.b(), instruction.c());
+//
+//      default:
+//        return std::format_to(ctx.out(), "unknown: {}",
+//                              static_cast<uint16_t>(instruction.m_code));
+//      }
+//    }
+//    }
+//    return ctx.out();
+//  }
+//};
+//
+// namespace tbc {
+// inline auto operator<<(std::ostream &out, Instruction instruction)
+//    -> std::ostream & {
+//  out << std::format("{}", instruction);
+//  return out;
+//}
+//} // namespace tbc
 
 #endif // !TBC_REPRESENTATION_INSTRUCTION_HPP

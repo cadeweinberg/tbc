@@ -113,8 +113,7 @@ static leaf::result<void> executeInstruction(Instruction instruction,
   case Instruction::Kind::integral:
     return executeIntegral(instruction, context);
   default:
-    return leaf::new_error(
-        std::format("Invalid instruction kind: {}", instruction.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
 }
 
@@ -124,9 +123,7 @@ static leaf::result<void> executeControl(Instruction instruction,
   case Instruction::Control::ret:
     return executeRet(instruction, context);
   default:
-    return leaf::new_error(
-        std::format("Invalid control instruction code: {}",
-                    instruction.code<Instruction::Control>()));
+    return leaf::new_error(Error::create(instruction));
   }
 }
 
@@ -138,9 +135,7 @@ static leaf::result<void> executeMemory(Instruction instruction,
   case Instruction::Memory::mvu:
     return executeMvu(instruction, context);
   default:
-    return leaf::new_error(
-        std::format("Invalid memory instruction code: {}",
-                    instruction.code<Instruction::Memory>()));
+    return leaf::new_error(Error::create(instruction));
   }
 }
 
@@ -160,9 +155,7 @@ static leaf::result<void> executeBitwise(Instruction instruction,
   case Instruction::Bitwise::sr:
     return executeSr(instruction, context);
   default:
-    return leaf::new_error(
-        std::format("Invalid bitwise instruction code: {}",
-                    instruction.code<Instruction::Bitwise>()));
+    return leaf::new_error(Error::create(instruction));
   }
 }
 
@@ -182,9 +175,7 @@ static leaf::result<void> executeComparison(Instruction instruction,
   case Instruction::Comparison::slte:
     return executeSlte(instruction, context);
   default:
-    return leaf::new_error(
-        std::format("Invalid comparison instruction code: {}",
-                    instruction.code<Instruction::Comparison>()));
+    return leaf::new_error(Error::create(instruction));
   }
 }
 
@@ -204,9 +195,7 @@ static leaf::result<void> executeIntegral(Instruction instruction,
   case Instruction::Integral::mod:
     return executeMod(instruction, context);
   default:
-    return leaf::new_error(
-        std::format("Invalid arithmetic instruction code: {}",
-                    instruction.code<Instruction::Integral>()));
+    return leaf::new_error(Error::create(instruction));
   }
 }
 
@@ -224,8 +213,7 @@ static leaf::result<void> executeRet(Instruction instruction,
     context->setResult(Value::create(a.as<uint64_t>()));
     break;
   default:
-    return leaf::new_error(std::format(
-        "Invalid operand kind in return instruction: {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -234,8 +222,7 @@ static leaf::result<void> executeMv(Instruction instruction,
                                     Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(std::format(
-        "Invalid destination operand kind in move instruction: {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   Register &destination = context->registerAt(a.as<Index>());
   Operand source = instruction.b();
@@ -251,8 +238,7 @@ static leaf::result<void> executeMv(Instruction instruction,
     destination = source.as<uint64_t>();
     break;
   default:
-    return leaf::new_error(std::format(
-        "Invalid source operand kind in move instruction: {}", source.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -261,9 +247,7 @@ static leaf::result<void> executeMvu(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(std::format(
-        "Invalid destination operand kind in move upper instruction: {}",
-        a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   Register &destination = context->registerAt(a.as<Index>());
   Operand source = instruction.b();
@@ -278,9 +262,7 @@ static leaf::result<void> executeMvu(Instruction instruction,
     destination = source.as<uint64_t>() << 32;
     break;
   default:
-    return leaf::new_error(
-        std::format("Invalid source operand kind in move upper instruction: {}",
-                    source.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -289,8 +271,7 @@ static leaf::result<void> executeAnd(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(std::format(
-        "Invalid destination operand kind in and instruction: {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   Register &destination = context->registerAt(a.as<Index>());
   Operand b = instruction.b();
@@ -310,8 +291,7 @@ static leaf::result<void> executeAnd(Instruction instruction,
       destination = left & c.as<uint64_t>();
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in and instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -329,8 +309,7 @@ static leaf::result<void> executeAnd(Instruction instruction,
       destination = left & c.as<uint64_t>();
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in and instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -347,14 +326,12 @@ static leaf::result<void> executeAnd(Instruction instruction,
       destination = left & c.as<uint64_t>();
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in and instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
   default:
-    return leaf::new_error(std::format(
-        "Invalid left operand kind in and instruction: {}", b.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -363,8 +340,7 @@ static leaf::result<void> executeOr(Instruction instruction,
                                     Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(std::format(
-        "Invalid destination operand kind in or instruction: {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   Register &destination = context->registerAt(a.as<Index>());
   Operand b = instruction.b();
@@ -384,8 +360,7 @@ static leaf::result<void> executeOr(Instruction instruction,
       destination = left | c.as<uint64_t>();
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in or instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -403,8 +378,7 @@ static leaf::result<void> executeOr(Instruction instruction,
       destination = left | c.as<uint64_t>();
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in or instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -421,14 +395,12 @@ static leaf::result<void> executeOr(Instruction instruction,
       destination = left | c.as<uint64_t>();
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in or instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
   default:
-    return leaf::new_error(std::format(
-        "Invalid left operand kind in or instruction: {}", b.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -437,8 +409,7 @@ static leaf::result<void> executeXor(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(std::format(
-        "Invalid destination operand kind in xor instruction: {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   Register &destination = context->registerAt(a.as<Index>());
   Operand b = instruction.b();
@@ -458,8 +429,7 @@ static leaf::result<void> executeXor(Instruction instruction,
       destination = left ^ c.as<uint64_t>();
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in xor instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -477,8 +447,7 @@ static leaf::result<void> executeXor(Instruction instruction,
       destination = left ^ c.as<uint64_t>();
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in xor instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -495,14 +464,12 @@ static leaf::result<void> executeXor(Instruction instruction,
       destination = left ^ c.as<uint64_t>();
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in xor instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
   default:
-    return leaf::new_error(std::format(
-        "Invalid left operand kind in xor instruction: {}", b.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -511,8 +478,7 @@ static leaf::result<void> executeNot(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(std::format(
-        "Invalid destination operand kind in xor instruction: {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   Register &destination = context->registerAt(a.as<Index>());
 
@@ -528,8 +494,7 @@ static leaf::result<void> executeNot(Instruction instruction,
     destination = ~(source.as<uint64_t>());
     break;
   default:
-    return leaf::new_error(std::format(
-        "Invalid source operand kind in not instruction: {}", source.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
 
   return {};
@@ -539,8 +504,7 @@ static leaf::result<void> executeSl(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(std::format(
-        "Invalid destination operand kind in sl instruction: {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   Register &destination = context->registerAt(a.as<Index>());
   Operand source = instruction.b();
@@ -550,8 +514,7 @@ static leaf::result<void> executeSl(Instruction instruction,
   case Operand::Kind::reg: {
     Register &shiftValue = context->registerAt(shift.as<Index>());
     if (shiftValue >= 64) {
-      return leaf::new_error(std::format(
-          "Shift value too large in sl instruction: {}", shiftValue));
+      return leaf::new_error(Error::create(instruction));
     }
 
     switch (source.kind()) {
@@ -563,8 +526,7 @@ static leaf::result<void> executeSl(Instruction instruction,
       destination = source.as<uint64_t>() << shiftValue;
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid source operand kind in sl instruction: {}", source.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -573,8 +535,7 @@ static leaf::result<void> executeSl(Instruction instruction,
   case Operand::Kind::u16: {
     uint64_t shiftValue = shift.as<uint64_t>();
     if (shiftValue >= 64) {
-      return leaf::new_error(std::format(
-          "Invalid shift value in sl instruction: {}", shiftValue));
+      return leaf::new_error(Error::create(instruction));
     }
 
     switch (source.kind()) {
@@ -586,8 +547,7 @@ static leaf::result<void> executeSl(Instruction instruction,
       destination = source.as<uint64_t>() << shiftValue;
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid source operand kind in sl instruction: {}", source.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -595,8 +555,7 @@ static leaf::result<void> executeSl(Instruction instruction,
    
 
   default:
-    return leaf::new_error(std::format(
-        "Invalid shift operand kind in sl instruction: {}", shift.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -605,8 +564,7 @@ static leaf::result<void> executeSr(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(std::format(
-        "Invalid destination operand kind in sr instruction: {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   Register &destination = context->registerAt(a.as<Index>());
   Operand source = instruction.b();
@@ -616,8 +574,7 @@ static leaf::result<void> executeSr(Instruction instruction,
   case Operand::Kind::reg: {
     Register &shiftValue = context->registerAt(shift.as<Index>());
     if (shiftValue >= 64) {
-      return leaf::new_error(std::format(
-          "Shift value too large in sr instruction: {}", shiftValue));
+      return leaf::new_error(Error::create(instruction));
     }
     switch (source.kind()) {
     case Operand::Kind::reg: {
@@ -630,8 +587,7 @@ static leaf::result<void> executeSr(Instruction instruction,
       break;
     }
     default:
-      return leaf::new_error(std::format(
-          "Invalid source operand kind in sr instruction: {}", source.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -640,8 +596,7 @@ static leaf::result<void> executeSr(Instruction instruction,
   case Operand::Kind::u16: {
     int64_t shiftValue = shift.as<int64_t>();
     if (shiftValue < 0 || shiftValue >= 64) {
-      return leaf::new_error(std::format(
-          "Invalid shift value in sr instruction: {}", shiftValue));
+      return leaf::new_error(Error::create(instruction));
     }
     switch (source.kind()) {
     case Operand::Kind::reg: {
@@ -654,15 +609,13 @@ static leaf::result<void> executeSr(Instruction instruction,
       break;
     }
     default:
-      return leaf::new_error(std::format(
-          "Invalid source operand kind in sr instruction: {}", source.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
 
   default:
-    return leaf::new_error(std::format(
-        "Invalid shift operand kind in sr instruction: {}", shift.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -671,8 +624,7 @@ static leaf::result<void> executeEq(Instruction instruction,
                                     Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(std::format(
-        "Invalid destination operand kind in xor instruction: {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   Register &destination = context->registerAt(a.as<Index>());
 
@@ -693,8 +645,7 @@ static leaf::result<void> executeEq(Instruction instruction,
       destination = (left == c.as<uint64_t>());
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in equals instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -728,8 +679,7 @@ static leaf::result<void> executeEq(Instruction instruction,
       destination = (left == c.as<uint64_t>());
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in equals instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -745,8 +695,7 @@ static leaf::result<void> executeNeq(Instruction instruction,
   // we return 0 for true and 1 for false since this is not equals.
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(std::format(
-        "Invalid destination operand kind in neq instruction: {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   Register &destination = context->registerAt(a.as<Index>());
   Operand b = instruction.b();
@@ -765,8 +714,7 @@ static leaf::result<void> executeNeq(Instruction instruction,
       destination = (left != c.as<uint64_t>());
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in neq instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -784,8 +732,7 @@ static leaf::result<void> executeNeq(Instruction instruction,
       destination = (left != c.as<uint64_t>());
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in neq instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -803,14 +750,12 @@ static leaf::result<void> executeNeq(Instruction instruction,
       destination = (left != c.as<uint64_t>());
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in neq instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
   default:
-    return leaf::new_error(std::format(
-        "Invalid left operand kind in neq instruction: {}", b.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -819,8 +764,7 @@ static leaf::result<void> executeLt(Instruction instruction,
                                     Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(std::format(
-        "Invalid destination operand kind in lt instruction: {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   Register &destination = context->registerAt(a.as<Index>());
 
@@ -838,8 +782,7 @@ static leaf::result<void> executeLt(Instruction instruction,
       destination = (left < c.as<uint64_t>());
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in lt instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -855,14 +798,12 @@ static leaf::result<void> executeLt(Instruction instruction,
       destination = (left < c.as<uint64_t>());
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in lt instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
   default:
-    return leaf::new_error(std::format(
-        "Invalid left operand kind in lt instruction: {}", b.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -871,8 +812,7 @@ static leaf::result<void> executeLte(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(std::format(
-        "Invalid destination operand kind in lte instruction: {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   Register &destination = context->registerAt(a.as<Index>());
 
@@ -890,8 +830,7 @@ static leaf::result<void> executeLte(Instruction instruction,
       destination = (left <= c.as<uint64_t>());
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in lte instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -907,14 +846,12 @@ static leaf::result<void> executeLte(Instruction instruction,
       destination = (left <= c.as<uint64_t>());
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in lte instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
   default:
-    return leaf::new_error(std::format(
-        "Invalid left operand kind in lte instruction: {}", b.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -923,8 +860,7 @@ static leaf::result<void> executeSlt(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(std::format(
-        "Invalid destination operand kind in slt instruction: {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   int64_t &destination = context->registerAs<int64_t>(a.as<Index>());
 
@@ -942,8 +878,7 @@ static leaf::result<void> executeSlt(Instruction instruction,
       destination = (left < c.as<int64_t>());
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in slt instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -959,14 +894,12 @@ static leaf::result<void> executeSlt(Instruction instruction,
       destination = (left < c.as<int64_t>());
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in slt instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
   default:
-    return leaf::new_error(std::format(
-        "Invalid left operand kind in slt instruction: {}", b.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -975,8 +908,7 @@ static leaf::result<void> executeSlte(Instruction instruction,
                                       Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(std::format(
-        "Invalid destination operand kind in slte instruction: {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   int64_t &destination = context->registerAs<int64_t>(a.as<Index>());
 
@@ -994,8 +926,7 @@ static leaf::result<void> executeSlte(Instruction instruction,
       destination = (left <= c.as<int64_t>());
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in slte instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -1011,14 +942,12 @@ static leaf::result<void> executeSlte(Instruction instruction,
       destination = (left <= c.as<int64_t>());
       break;
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in slte instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
   default:
-    return leaf::new_error(std::format(
-        "Invalid left operand kind in slte instruction: {}", b.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -1027,8 +956,7 @@ static leaf::result<void> executeNeg(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(
-        std::format("Invalid destination in neg instruction", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   int64_t &destination = context->registerAs<int64_t>(a.as<Index>());
   Operand source = instruction.b();
@@ -1041,8 +969,7 @@ static leaf::result<void> executeNeg(Instruction instruction,
     destination = -(source.as<int64_t>());
     break;
   default:
-    return leaf::new_error(std::format(
-        "Invalid source operand kind in neg instruction: {}", source.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -1051,8 +978,7 @@ static leaf::result<void> executeAdd(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(
-        std::format("Invalid destination in add instruction {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   int64_t &destination = context->registerAs<int64_t>(a.as<Index>());
   // two's compliment means that we can use the same add instruction
@@ -1079,8 +1005,7 @@ static leaf::result<void> executeAdd(Instruction instruction,
       break;
     }
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in add instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -1102,14 +1027,12 @@ static leaf::result<void> executeAdd(Instruction instruction,
       break;
     }
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in add instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
   default:
-    return leaf::new_error(std::format(
-        "Invalid left operand kind in add instruction: {}", b.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -1118,8 +1041,7 @@ static leaf::result<void> executeSub(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(
-        std::format("Invalid destination in sub instruction {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   int64_t &destination = context->registerAs<int64_t>(a.as<Index>());
   Operand b = instruction.b();
@@ -1142,8 +1064,7 @@ static leaf::result<void> executeSub(Instruction instruction,
       break;
     }
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in sub instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -1165,14 +1086,12 @@ static leaf::result<void> executeSub(Instruction instruction,
       break;
     }
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in sub instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
   default:
-    return leaf::new_error(std::format(
-        "Invalid left operand kind in sub instruction: {}", b.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -1181,8 +1100,7 @@ static leaf::result<void> executeMul(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(
-        std::format("Invalid destination in mul instruction {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   int64_t &destination = context->registerAs<int64_t>(a.as<Index>());
   Operand b = instruction.b();
@@ -1205,8 +1123,7 @@ static leaf::result<void> executeMul(Instruction instruction,
       break;
     }
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in mul instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -1229,16 +1146,12 @@ static leaf::result<void> executeMul(Instruction instruction,
       break;
     }
     default:
-      return leaf::new_error(std::format("Invalid right operand kind in "
-                                         "mul instruction: {}",
-                                         c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
   default:
-    return leaf::new_error(std::format("Invalid left operand kind in mul "
-                                       "instruction: {}",
-                                       b.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -1247,8 +1160,7 @@ static leaf::result<void> executeDiv(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(
-        std::format("Invalid destination in div instruction {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   int64_t &destination = context->registerAs<int64_t>(a.as<Index>());
   Operand b = instruction.b();
@@ -1271,8 +1183,7 @@ static leaf::result<void> executeDiv(Instruction instruction,
       break;
     }
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in div instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -1293,14 +1204,13 @@ static leaf::result<void> executeDiv(Instruction instruction,
       destination = result;
       break;
     }
-    default: return leaf::new_error(std::format(
-          "Invalid right operand kind in div instruction: {}", c.kind()));
+    default:
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
   default:
-    return leaf::new_error(
-        std::format("Invalid left operand in div instruction: {}", b.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }
@@ -1309,8 +1219,7 @@ static leaf::result<void> executeMod(Instruction instruction,
                                      Context::Ptr context) {
   Operand a = instruction.a();
   if (a.kind() != Operand::Kind::reg) {
-    return leaf::new_error(
-        std::format("Invalid destination in mod instruction {}", a.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   int64_t &destination = context->registerAs<int64_t>(a.as<Index>());
   Operand b = instruction.b();
@@ -1333,8 +1242,7 @@ static leaf::result<void> executeMod(Instruction instruction,
       break;
     }
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in mod instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
@@ -1356,14 +1264,12 @@ static leaf::result<void> executeMod(Instruction instruction,
       break;
     }
     default:
-      return leaf::new_error(std::format(
-          "Invalid right operand kind in mod instruction: {}", c.kind()));
+      return leaf::new_error(Error::create(instruction));
     }
     break;
   }
   default:
-    return leaf::new_error(
-        std::format("Invalid left operand in mod instruction: {}", b.kind()));
+    return leaf::new_error(Error::create(instruction));
   }
   return {};
 }

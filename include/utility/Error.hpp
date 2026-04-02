@@ -32,24 +32,19 @@
 
 #include <version>
 
-#include <type_traits>
-
 #include <ostream>
 #include <string>
 
-#if defined(__cpp_lib_stacktrace) && __cpp_lib_stacktrace >= 202011L
+#if defined(__cpp_lib_stacktrace) && __cpp_lib_stacktrace >= 202011L \
+ && defined(__cpp_lib_format) && __cpp_lib_format >= 202311L \
+ && defined(__cpp_lib_source_location) && __cpp_lib_source_location >= 201907L
+#include <type_traits>
+#include <format>
+#include <source_location>
 #include <stacktrace>
 // #TODO: if libstdc++ doesn't support std::stacktrace, we should
 // include boost stacktrace instead. as boost stacktrace supports C++03.
-#endif
 
-#if defined(__cpp_lib_format) && __cpp_lib_format >= 202311L
-#include <format>
-#endif
-
-#if defined(__cpp_lib_source_location) && __cpp_lib_source_location >= 201907L
-#include <source_location>
-#endif
 
 namespace tbc {
 	struct Error {
@@ -58,7 +53,7 @@ namespace tbc {
 		std::stacktrace trace;
 
 		static Error
-			current(std::string message,
+                create(std::string message,
 				std::source_location location = std::source_location::current(),
 				std::stacktrace trace = std::stacktrace::current()) {
 			return { std::move(message), std::move(location), std::move(trace) };
@@ -154,6 +149,31 @@ namespace tbc {
 		return out;
 	}
 } // namespace tbc
-#endif
+#endif // std::formatters
+#else 
+#include <sstream>
+#include <tuple>
+
+namespace tbc {
+struct Error {
+  std::string message;
+
+  static Error create(std::string message) { return {std::move(message)}; }
+
+  template <class... Args> static Error create(Args &&...args) {
+    std::stringstream buffer; 
+	(buffer << ... << std::forward<Args>(args));
+    return {buffer.str()};
+  }
+};
+
+inline auto operator<<(std::ostream &out, const Error &error)
+    -> std::ostream & {
+  out << "Error: " << error.message;
+  return out;
+}
+} // namespace tbc
+
+#endif // std::format && std::source_location && std::stacktrace
 
 #endif // !TBC_UTILITY_ERROR_HPP

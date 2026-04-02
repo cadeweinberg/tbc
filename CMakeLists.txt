@@ -33,6 +33,7 @@ project(TBC
 
 set (TBC_BASE_DIR    ${TBC_SOURCE_DIR})
 set (TBC_CMAKE_DIR   ${TBC_BASE_DIR}/cmake)
+set (TBC_HTML_DIR    ${TBC_BASE_DIR}/html)
 set (TBC_INCLUDE_DIR ${TBC_BASE_DIR}/include)
 set (TBC_SOURCE_DIR  ${TBC_BASE_DIR}/source)
 set (TBC_TEST_DIR    ${TBC_BASE_DIR}/test)

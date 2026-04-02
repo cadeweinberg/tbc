@@ -24,13 +24,16 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#include <utility>
+
 #include "input/Parser.hpp"
+#include "utility/Error.hpp"
 
 namespace tbc {
 leaf::result<Operand> Parser::infix(Precedence precedence) {
   const Rule &rule = lookupRule(m_current);
   if (rule.prefix == nullptr) {
-    return leaf::new_error(std::format("Expected expression"));
+    return leaf::new_error(Error::create("Expected expression"));
   }
 
   BOOST_LEAF_AUTO(destination, (this->*rule.prefix)());
@@ -51,14 +54,14 @@ leaf::result<Operand> Parser::infix(Precedence precedence) {
 leaf::result<Operand> Parser::parenthesis() {
   BOOST_LEAF_AUTO(found_begin_parenthesis, expect(Token::beginParenthesis));
   if (!found_begin_parenthesis) {
-    return leaf::new_error(std::format("Expected '('"));
+    return leaf::new_error(Error::create("Expected '('"));
   }
 
   BOOST_LEAF_AUTO(destination, infix(Precedence::assignment));
 
   BOOST_LEAF_AUTO(found_end_parenthesis, expect(Token::endParenthesis));
   if (!found_end_parenthesis) {
-    return leaf::new_error(std::format("Expected ')'"));
+    return leaf::new_error(Error::create("Expected ')'"));
   }
 
   return destination;
@@ -75,7 +78,7 @@ leaf::result<Operand> Parser::unary() {
     return m_context->emitNeg(right);
 
   default:
-    return leaf::new_error(std::format("{} is not a unary operator.", unop));
+    return leaf::new_error(Error::create(unop, " is not a unary operator."));
   }
 }
 
@@ -99,7 +102,7 @@ leaf::result<Operand> Parser::binary(Operand left) {
     return m_context->emitMod(left, right);
 
   default:
-    return leaf::new_error(std::format("{} is not a binary operator", binop));
+    return leaf::new_error(Error::create(binop, " is not a binary operator"));
   }
 }
 
@@ -116,20 +119,19 @@ leaf::result<Operand> Parser::primary() {
     return Operand::u16(0);
 
   case Token::integer: {
-    int16_t value = 0;
     auto view = m_lexer.current();
-    auto [ptr, ec] =
-        std::from_chars(view.data(), view.data() + view.length(), value);
-    if (ec != std::errc{}) {
+    int64_t value = std::strtoll(view.data(), nullptr, 10);
+    if (!std::in_range<int16_t>(value)) {
       return leaf::new_error(
-          std::format("{}", std::make_error_code(ec).message()));
+          Error::create("Integer literal out of range: ", view));
     }
     BOOST_LEAF_CHECK(next());
     return Operand::i16(value);
   }
 
   default:
-    return leaf::new_error(std::format("{} is not a primary token", m_current));
+    return leaf::new_error(
+        Error::create(m_current, " is not a primary token"));
   }
 }
 

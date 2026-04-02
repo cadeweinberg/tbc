@@ -29,6 +29,7 @@
 #include <cstdint>
 #include <variant>
 #include <memory>
+#include <ostream>
 
 namespace tbc {
 using Nil = std::monostate;
@@ -63,41 +64,53 @@ public:
   Variant const &variant() const { return m_variant; }
   Variant &variant() { return m_variant; }
 };
+
+inline std::ostream &operator<<(std::ostream &out, const Nil &) {
+  out << "nil";
+  return out;
+}
+
+inline std::ostream &operator<<(std::ostream &out, const Value &value) {
+  std::visit(
+      [&out](const auto &variant) {
+        out << variant;
+      },
+      value.variant());
+  return out;
+}
 } // namespace tbc
 
-template <> struct std::formatter<tbc::Nil> {
-   template <class ParseContext>
-  constexpr auto parse(ParseContext &ctx) -> ParseContext::iterator {
-    return ctx.end();
-  }
-  template <class FormatContext>
-  auto format(const tbc::Nil &, FormatContext &context) const
-      -> FormatContext::iterator {
-    return std::format_to(context.out(), "nil");
-  }
-};
-
-template <>
-struct std::formatter<tbc::Value> {
-  template <class ParseContext>
-  constexpr auto parse(ParseContext &ctx) -> ParseContext::iterator {
-    return ctx.end();
-  }
-  template <class FormatContext>
-  auto format(const tbc::Value &value, FormatContext &context) const
-      -> FormatContext::iterator {
-    return std::visit(
-        [&](const auto &variant) {
-          return std::format_to(context.out(), "{}", variant);
-        },
-        value.variant());
-  }
-};
+//template <> struct std::formatter<tbc::Nil> {
+//   template <class ParseContext>
+//  constexpr auto parse(ParseContext &ctx) -> ParseContext::iterator {
+//    return ctx.end();
+//  }
+//  template <class FormatContext>
+//  auto format(const tbc::Nil &, FormatContext &context) const
+//      -> FormatContext::iterator {
+//    return std::format_to(context.out(), "nil");
+//  }
+//};
+//
+//template <>
+//struct std::formatter<tbc::Value> {
+//  template <class ParseContext>
+//  constexpr auto parse(ParseContext &ctx) -> ParseContext::iterator {
+//    return ctx.end();
+//  }
+//  template <class FormatContext>
+//  auto format(const tbc::Value &value, FormatContext &context) const
+//      -> FormatContext::iterator {
+//    return std::visit(
+//        [&](const auto &variant) {
+//          return std::format_to(context.out(), "{}", variant);
+//        },
+//        value.variant());
+//  }
+//};
 
 namespace tbc {
-inline std::ostream &operator<<(std::ostream &out, const Value &value) {
-  return out << std::format("{}", value);
-}
+
 } // namespace tbc
 
 #endif // !TBC_REPRESENTATION_VALUE_HPP
