@@ -47,7 +47,8 @@ target_include_directories(tbc_common PUBLIC
 )
 
 target_link_libraries(tbc_common PUBLIC 
-    Boost::headers_with_leaf
+    Boost::leaf
+    Boost::random
     Boost::program_options
 )
 

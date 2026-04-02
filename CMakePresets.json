@@ -44,6 +44,7 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_CXX_STANDARD": "23",
+        "CMAKE_CXX_FLAGS": "-fms-extensions",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/debug_web",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
@@ -59,6 +60,7 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_CXX_STANDARD": "23",
+        "CMAKE_CXX_FLAGS": "-fms-extensions",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/out/release_web",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
