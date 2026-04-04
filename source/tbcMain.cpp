@@ -77,8 +77,11 @@ void readEvaluatePrint(char *input) {
     return;
   }
 
+  //std::cout << "Expression compiled to:\n";
+  //std::cout << *context->getExpression();
+  //std::cout << "Expression evaluated to:\n";
   std::cout << "$ " << *context->getResult() << "\n";
-  std::cout << *context->getExpression();
+  
 
   free(input);
 }
@@ -117,6 +120,7 @@ int main(int argc, char **argv) {
 
 static void readEvaluatePrint(tbc::Context::Ptr context) {
   tbc::Parser parser{context};
+  bool hasError = false;
 
   std::cout << ">> ";
   std::string input{};
@@ -124,18 +128,34 @@ static void readEvaluatePrint(tbc::Context::Ptr context) {
 
   parser.set(input);
 
-  leaf::try_handle_all(
-      [&]() -> leaf::result<void> { return parser.pull(); },
-      [&](tbc::Error const &error) { std::cerr << error << "\n"; },
+  leaf::try_handle_all([&]() -> leaf::result<void> { return parser.pull(); },
+                       [&](tbc::Error const &error) {
+                         std::cerr << error << "\n";
+                         hasError = true;
+                        },
       [&]() { std::abort(); });
+
+  if (hasError) {
+    return;
+  }
 
   leaf::try_handle_all(
       [&]() -> leaf::result<void> { return tbc::execute(context); },
-      [&](tbc::Error const &error) { std::cerr << error << "\n"; },
+      [&](tbc::Error const &error) {
+        std::cerr << error << "\n";
+        hasError = true;
+       },
       [&]() { std::abort(); });
 
+  if (hasError) {
+    return;
+  }
+
+  //std::cout << "Compiled expression:\n";
+  //std::cout << *context->getExpression();
+  //std::cout << "Expression evaluated to:\n";
   std::cout << "$ " << *context->getResult() << "\n";
-  std::cout << *context->getExpression();
+  
 }
 
 #endif

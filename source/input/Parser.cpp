@@ -73,7 +73,9 @@ leaf::result<Operand> Parser::unary() {
 
   BOOST_LEAF_AUTO(right, infix(Precedence::unary));
 
-  switch (m_current) {
+  switch (unop) {
+  case Token::not_:
+    return m_context->emitNot(right);
   case Token::minus:
     return m_context->emitNeg(right);
 
@@ -90,6 +92,24 @@ leaf::result<Operand> Parser::binary(Operand left) {
   BOOST_LEAF_AUTO(right, infix(rule.precedence + 1));
 
   switch (binop) {
+  case Token::and_:
+    return m_context->emitAnd(left, right);
+  case Token::or_:
+    return m_context->emitOr(left, right);
+  case Token::xor_:
+    return m_context->emitXor(left, right);
+  case Token::equalsEquals:
+    return m_context->emitEq(left, right);
+  case Token::notEquals:
+    return m_context->emitNeq(left, right);
+  case Token::less:
+    return m_context->emitSlt(left, right);
+  case Token::lessEquals:
+    return m_context->emitSlte(left, right);
+  case Token::greater:
+    return m_context->emitSgt(left, right);
+  case Token::greaterEquals:
+    return m_context->emitSgte(left, right);
   case Token::plus:
     return m_context->emitAdd(left, right);
   case Token::minus:

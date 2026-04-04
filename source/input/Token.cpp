@@ -50,10 +50,20 @@ std::string_view token_to_view(Token token) noexcept {
     return "Bool"sv;
   case Token::typeI64:
     return "I64"sv;
+  case Token::and_:
+    return "and"sv;
+  case Token::or_:
+    return "or"sv;
+  case Token::xor_:
+    return "xor"sv;
+  case Token::not_:
+    return "not"sv;
   case Token::equals:
     return "="sv;
   case Token::equalsEquals:
     return "=="sv;
+  case Token::notEquals:
+    return "!="sv;
   case Token::less:
     return "<"sv;
   case Token::lessEquals:

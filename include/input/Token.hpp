@@ -46,8 +46,14 @@ enum class Token : uint8_t {
   typeBool,
   typeI64,
 
+  and_,
+  or_,
+  xor_,
+  not_,
+
   equals,
   equalsEquals,
+  notEquals,
   less,
   lessEquals,
   greater,

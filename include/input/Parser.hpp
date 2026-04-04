@@ -124,14 +124,19 @@ private:
       {nullptr, nullptr, Precedence::none},               // Token::return_
       {nullptr, nullptr, Precedence::none},               // Token::let
       {nullptr, nullptr, Precedence::none},               // Token::fn
-      {&Parser::primary, nullptr, Precedence::none},   // Token::nil
+      {&Parser::primary, nullptr, Precedence::none},      // Token::nil
       {&Parser::primary, nullptr, Precedence::none},      // Token::true_
       {&Parser::primary, nullptr, Precedence::none},      // Token::false_
       {nullptr, nullptr, Precedence::none},               // Token::typeNil
       {nullptr, nullptr, Precedence::none},               // Token::typeBool
       {nullptr, nullptr, Precedence::none},               // Token::typeI64
+      {nullptr, &Parser::binary, Precedence::and_},       // Token::and_
+      {nullptr, &Parser::binary, Precedence::or_},        // Token::or_
+      {nullptr, &Parser::binary, Precedence::or_},        // Token::xor_
+      {&Parser::unary, nullptr,  Precedence::unary},      // Token::not_
       {nullptr, &Parser::binary, Precedence::assignment}, // Token::equals
       {nullptr, &Parser::binary, Precedence::equality},   // Token::equalsEquals
+      {nullptr, &Parser::binary, Precedence::equality},   // Token::notEquals
       {nullptr, &Parser::binary, Precedence::comparison}, // Token::less
       {nullptr, &Parser::binary, Precedence::comparison}, // Token::lessEquals
       {nullptr, &Parser::binary, Precedence::comparison}, // Token::greater

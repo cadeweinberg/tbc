@@ -105,8 +105,13 @@ leaf::result<Token> Lexer::next() {
       "Bool"   { return Token::typeBool; }
       "I64"    { return Token::typeI64; }
 
+      "&"  { return Token::and_; }
+      "|"  { return Token::or_; }
+      "^"  { return Token::xor_; }
+      "!"  { return Token::not_; }
       "="  { return Token::equals; }
       "==" { return Token::equalsEquals; }
+      "!=" { return Token::notEquals; }
       "<"  { return Token::less; }
       "<=" { return Token::lessEquals; }
       ">"  { return Token::greater; }
